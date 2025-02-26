@@ -9,18 +9,22 @@ import {
     faEnvelope,
     faTruck,
     faExclamationTriangle,
-    faBars
+    faBars,
+    faMapMarkerAlt
 } from "@fortawesome/free-solid-svg-icons";
-import SidebarItem from "./SidebarItem";  // Import the new component
+import SidebarItem from "./SidebarItem";
 import "../styles/Sidebar.css";
 
 const Sidebar: React.FC = () => {
     const [isCollapsed, setIsCollapsed] = useState(window.innerWidth <= 768);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-    // Function to handle window resize
     useEffect(() => {
         const handleResize = () => {
-            setIsCollapsed(window.innerWidth <= 768);
+            setIsMobile(window.innerWidth <= 768);
+            if (window.innerWidth <= 768) {
+                setIsCollapsed(true); // Force collapsed mode on mobile
+            }
         };
 
         window.addEventListener("resize", handleResize);
@@ -29,16 +33,28 @@ const Sidebar: React.FC = () => {
 
     return (
         <div className={`sidenav ${isCollapsed ? "sidenav-collapsed" : ""}`}>
+            {/* Sidebar Logo Section with Hamburger Menu */}
             <div className="logo-container">
-                <button className="logo" onClick={() => setIsCollapsed(!isCollapsed)}>
+                {!isCollapsed && !isMobile && (
+                    <img src="/interlinkedlogo.jpg" alt="Interlinked Logo" className="sidebar-logo" />
+                )}
+                <button
+                    className="logo-toggle"
+                    onClick={() => !isMobile && setIsCollapsed(!isCollapsed)}
+                >
                     <FontAwesomeIcon icon={faBars} />
                 </button>
-                {!isCollapsed && <span className="logo-text">interlinked.</span>}
             </div>
 
+            {/* Sidebar Navigation Items */}
             <ul className="sidenav-nav">
                 <SidebarItem icon={faTachometerAlt} text="Dashboard" isCollapsed={isCollapsed} />
-                <SidebarItem icon={faFire} text="Recent Incidents" isCollapsed={isCollapsed} />
+                <SidebarItem
+                    icon={faFire}
+                    text="Recent Incidents"
+                    isCollapsed={isCollapsed}
+                    subItems={!isMobile ? [{ icon: faMapMarkerAlt, text: "Locate most recent incident" }] : undefined}
+                />
                 <SidebarItem icon={faUserShield} text="Active Duty Deployed" isCollapsed={isCollapsed} />
                 <SidebarItem icon={faMapMarkedAlt} text="District Map" isCollapsed={isCollapsed} />
                 <SidebarItem icon={faExclamationTriangle} text="Probability & Risk" isCollapsed={isCollapsed} />
