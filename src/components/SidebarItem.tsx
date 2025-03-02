@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons"; // Down arrow icon
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import "../styles/SidebarItem.css";
 
@@ -7,14 +8,18 @@ interface SidebarItemProps {
     icon: IconDefinition;
     text: string;
     isCollapsed: boolean;
-    subItems?: { icon: IconDefinition; text: string }[]; // Array of sub-items
-    isMobile?: boolean; // Added to check if it's mobile view
+    subItems?: { icon: IconDefinition; text: string }[];
+    isMobile?: boolean;
 }
 
 const SidebarItem: React.FC<SidebarItemProps> = ({ icon, text, isCollapsed, subItems, isMobile }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
-    // Function to toggle expansion (disabled in mobile view)
+    // Force reapply styles when component updates
+    useEffect(() => {
+        console.log(`Sidebar ${text} expanded:`, isExpanded);
+    }, [isExpanded]);
+
     const toggleExpansion = () => {
         if (!isMobile && subItems) {
             setIsExpanded(!isExpanded);
@@ -23,13 +28,20 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ icon, text, isCollapsed, subI
 
     return (
         <li className={`sidenav-nav-item ${isExpanded ? "expanded" : ""}`} title={isCollapsed ? text : ""}>
-            {/* Main Sidebar Item */}
             <a href="#" className="sidenav-nav-link" onClick={toggleExpansion}>
                 <FontAwesomeIcon icon={icon} className="sidenav-link-icon" />
                 {!isCollapsed && <span className="sidenav-link-text">{text}</span>}
+                
+                {/* Down Arrow */}
+                {!isCollapsed && subItems && (
+                    <FontAwesomeIcon 
+                        icon={faChevronDown} 
+                        className={`sidenav-arrow ${isExpanded ? "rotated" : ""}`} 
+                    />
+                )}
             </a>
 
-            {/* Sublist (Only if subItems exist & not in mobile view) */}
+            {/* Sublist */}
             {!isCollapsed && !isMobile && isExpanded && subItems && (
                 <ul className="sidenav-sublist">
                     {subItems.map((subItem, index) => (

@@ -1,0 +1,102 @@
+.disaster-card {
+    width: 100%;
+    max-width: 750px;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, #ffffff, #f8f8f8);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.15);
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #ddd;
+    gap: 15px; /* Added spacing between image and text */
+}
+
+.disaster-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 12px 20px rgba(0, 0, 0, 0.2);
+}
+
+.disaster-info {
+    flex: 1; /* Ensures text fills remaining space */
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    min-width: 0; /* Prevents text overflow */
+}
+
+.disaster-info h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    word-wrap: break-word;
+}
+
+.status {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.ongoing {
+    color: #e63946;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.resolved {
+    color: #2a9d8f;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.view-details {
+    padding: 12px 20px;
+    border: none;
+    background: linear-gradient(90deg, #000, #333);
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    align-self: flex-start; /* Keeps button aligned to left */
+    margin-top: 10px; /* Pushes the button to the bottom */
+}
+
+
+.view-details:hover {
+    background: linear-gradient(90deg, #333, #000);
+    transform: scale(1.05);
+}
+
+/* Fix for image getting cut off */
+.disaster-image {
+    width: 300px;
+    max-width: 30%; /* Makes image responsive */
+    height: auto;
+    aspect-ratio: 16 / 11; /* Maintains proper aspect ratio */
+    
+    border-radius: 10px;
+    border: 2px solid #ddd;
+    flex-shrink: 0; /* Prevents shrinking */
+    transition: transform 0.3s ease;
+}
+
+.disaster-card:hover .disaster-image {
+    transform: scale(1.05);
+}
+
+/* Responsive Fixes */
+@media (max-width: 600px) {
+    .disaster-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .disaster-image {
+        width: 100%;
+        max-width: 100%;
+        aspect-ratio: 16 / 9;
+    }
+}

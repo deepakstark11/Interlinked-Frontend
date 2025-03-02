@@ -112,3 +112,18 @@
 .sidenav-subitem-text {
     font-size: 14px;
 }
+
+/* Down arrow styling */
+.sidenav-arrow {
+    margin-left: auto; /* Push arrow to the right */
+    font-size: 1rem;
+    transition: transform 0.3s ease-in-out;
+    color: rgba(255, 255, 255, 0.8); /* Adjust color */
+}
+
+/* Rotate arrow when expanded */
+.sidenav-nav-item.expanded .sidenav-arrow {
+    transform: rotate(180deg) !important;
+}
+
+

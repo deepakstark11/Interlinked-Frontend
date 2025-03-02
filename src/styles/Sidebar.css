@@ -2,7 +2,7 @@
 .sidenav {
     background: black;
     transition: all 0.5s ease-in-out;
-    position: fixed;
+    position: sticky;
     z-index: 1;
     top: 0;
     left: 0;
@@ -12,7 +12,13 @@
     display: flex;
     flex-direction: column;
     padding-top: 1rem;
+    overflow: hidden;
+    font-family: 'Poppins', sans-serif;
+
+
 }
+
+
 
 /* Collapsed Sidebar */
 .sidenav-collapsed {
@@ -33,11 +39,14 @@
     width: 120px;
     height: auto;
     display: block;
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
 }
 
 /* Sidebar Collapsed - Hide Logo */
 .sidenav-collapsed .sidebar-logo {
-    display: none;
+    opacity: 0;
+    pointer-events: none;
 }
 
 /* Fix Hamburger Menu Button */
@@ -53,7 +62,6 @@
     justify-content: center;
     width: 40px;
     height: 40px;
-    border-radius: 50%;
     transition: background 0.3s ease;
 }
 
@@ -84,6 +92,7 @@
 .sidenav-nav .sidenav-nav-item {
     width: 100%;
     margin-bottom: 0.625rem;
+    position: relative;
 }
 
 /* Sidebar Navigation Links */
@@ -94,25 +103,52 @@
     color: white;
     text-decoration: none;
     border-radius: 0.625rem;
-    transition: all 0.3s ease;
+    transition: background 0.3s ease-in-out, color 0.4s ease-in-out;
     padding: 10px;
     width: 100%;
     justify-content: flex-start;
+    position: relative;
 }
 
-.sidenav-collapsed .sidenav-nav-item .sidenav-nav-link {
-    justify-content: center;
+/* Sidebar Icons */
+.sidenav-nav .sidenav-nav-item .sidenav-nav-link .sidenav-link-icon {
+    font-size: 22px;
+    width: 2rem;
+    min-width: 2rem;
+    text-align: center;
+    padding: 12px;
 }
+
+/* Sidebar Text - Smooth Fade-in & Slide-in */
+.sidenav-nav .sidenav-nav-item .sidenav-nav-link .sidenav-link-text {
+    margin-left: 1.5rem;
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+    display: inline-block; /* Ensures it remains visible */
+    white-space: nowrap; /* Prevents wrapping */
+}
+
+/* Hide Text When Sidebar is Collapsed */
+.sidenav-collapsed .sidenav-nav-item .sidenav-nav-link .sidenav-link-text {
+    opacity: 0;
+    transform: translateX(-10px);
+    pointer-events: none;
+    transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+}
+
 
 /* Sidebar Hover Effects */
 .sidenav-nav .sidenav-nav-item:hover .sidenav-nav-link {
-    background-color: white;
-    color: black;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: white;
+    transition: background 0.3s ease-in-out;
 }
 
 /* Active State */
 .active {
     background-color: white;
+    color: black;
 }
 
 .active .sidenav-link-icon,
@@ -125,7 +161,16 @@
     list-style: none;
     padding-left: 2rem;
     margin-top: 5px;
-    transition: all 0.3s ease-in-out;
+    transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+}
+
+/* Expand Sublist When Active */
+.sidenav-nav-item.expanded .sidenav-sublist {
+    max-height: 200px;
+    opacity: 1;
 }
 
 /* Sublist Item */
@@ -139,8 +184,11 @@
     cursor: pointer;
 }
 
+/* Sublist Hover Effect */
 .sidenav-subitem:hover {
     background-color: rgba(255, 255, 255, 0.2);
+    transform: translateX(5px);
+    transition: all 0.3s ease-in-out;
 }
 
 /* Sublist Icon */
@@ -154,37 +202,3 @@
     font-size: 14px;
 }
 
-/* Sidebar Notification Dot */
-.notification-dot {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    width: 8px;
-    height: 8px;
-    background-color: red;
-    border-radius: 50%;
-}
-
-/* Mobile View: Always Collapsed */
-@media (max-width: 768px) {
-    .sidenav {
-        width: 5rem !important;
-    }
-
-    .sidenav .sidebar-logo {
-        display: none !important;
-    }
-
-    .sidenav-nav .sidenav-nav-item .sidenav-nav-link {
-        justify-content: center !important;
-    }
-
-    .sidenav-nav .sidenav-nav-item .sidenav-nav-link .sidenav-link-text {
-        display: none !important;
-    }
-
-    /* Prevent Sublist Expansion */
-    .sidenav-sublist {
-        display: none !important;
-    }
-}
