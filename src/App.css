@@ -74,3 +74,34 @@ h1::after {
 h1:hover::after {
   width: 80%;
 }
+
+
+.map-container {
+  height: 600px; /* Ensure map has a visible height */
+  width: 100%; /* Take full width */
+  position: relative;
+}
+
+.map {
+  height: 100%;
+  width: 100%;
+}
+
+.map-container {
+  height: 600px;
+  width: 100%;
+  position: relative;
+}
+
+.location-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+
+.location-icon {
+  color: rgb(197, 6, 6);
+}
+
+
+
