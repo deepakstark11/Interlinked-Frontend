@@ -1,6 +1,13 @@
 import React from 'react';
 import DisasterCard from './DisasterCard';
 import '../styles/IncidentList.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSearch, faFilter } from '@fortawesome/free-solid-svg-icons';
+
+//Structure for how and what the disaster cards would have 
+interface DisasterEvent {
+
+}
 
 const disasterData = [
   {
