@@ -61,7 +61,7 @@ const disasterData: DisasterEvent[] = [
     date_of_occurrence: "2024-06-15T14:30:00Z",
     location: "CA-2 Palmdale, CA 93550",
     coordinates: {
-      latitude: 34.587010,
+      latitude: 32.587010,
       longitude: -118.127794
     },
     source: "California Department of Forestry and Fire Protection",
@@ -99,8 +99,8 @@ const disasterData: DisasterEvent[] = [
     date_of_occurrence: "2016-06-20T00:00:00Z",
     location: "Irwindale, CA 91702",
     coordinates: {
-      latitude: 34.168,
-      longitude: -117.9
+      latitude: 30.168,
+      longitude: -115.9
     },
     source: "National Weather Service",
     event_metadata: { acres_burned: 5399, containment: "100%" },
@@ -218,7 +218,7 @@ const IncidentList: React.FC = () => {
           <FontAwesomeIcon icon={faSearch} className="search-icon" />
           <input
             type="text"
-            placeholder="Search by location or coordinates (e.g., 34.1678,-118.1309)"
+            placeholder="Search by location, coordinates (e.g., 34.1678,-118.1309) or category of disaster"
             value={searchTerm}
             onChange={handleSearchChange}
             className="search-input"
