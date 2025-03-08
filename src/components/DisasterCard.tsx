@@ -2,25 +2,28 @@ import React from 'react';
 import '../styles/DisasterCard.css';
 
 interface DisasterCardProps {
-  id: number;
+  unique_id: string;
   name: string;
-  status: string;
-  resolvedDate?: string;
   description: string;
-  location: string;
-  acres: number;
-  image: string;
   category: string;
-  ewm_number: string;
   start_date: string;
+  location: string;
   coordinates: {
     latitude: number;
     longitude: number;
   }
+  source: string;
+  resolvedDate?: string;
+  event_metadata: Record<string, any>;
+  weather_metadata: Record<string, any>;
+  insights: Record<string, any>;
+  ewm_number: number;
+  status: string;
+  image: string;
 }
 
 const DisasterCard: React.FC<DisasterCardProps> = ({ 
-  id, 
+  unique_id, 
   name, 
   status, 
   resolvedDate, 
@@ -48,7 +51,7 @@ const DisasterCard: React.FC<DisasterCardProps> = ({
     <div className="disaster-card">
       <div className="disaster-info">
         <div className="disaster-header">
-          <span className="event-id">{id}</span>
+          <span className="event-id">{unique_id}</span>
           <span className={status == 'ONGOING' ? 'status ongoing' : 'status resolved'}>
             {status}
           </span>
