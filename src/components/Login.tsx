@@ -7,7 +7,7 @@ const Login: React.FC = () => {
   const [credentials, setCredentials] = useState({ username: "", password: "" });
   const [error, setError] = useState<string | null>(null);
   const auth = useContext(AuthContext);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
