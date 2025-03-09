@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { GoogleMap, LoadScript, OverlayView } from "@react-google-maps/api";
+// import { GoogleMap, LoadScript, OverlayView } from "@react-google-maps/api";
 import LocationMarker from "./LocationMarker";
 import LocationInfoBox from "./LocationInfoBox";
 import "../styles/FireMap.css";

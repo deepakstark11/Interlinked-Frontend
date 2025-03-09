@@ -12,9 +12,9 @@ import {
     faBars,
     faMapMarkerAlt
 } from "@fortawesome/free-solid-svg-icons";
-import { Route, Routes } from "react-router-dom";
+// import { Route, Routes } from "react-router-dom";
 import SidebarItem from "./SidebarItem";
-import FireMap from "./FireMap";
+// import FireMap from "./FireMap";
 import "../styles/Sidebar.css";
 
 const Sidebar: React.FC = () => {
