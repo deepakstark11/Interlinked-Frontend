@@ -1,8 +1,8 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import DisasterCard from './DisasterCard';
 import '../styles/IncidentList.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faFilter } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faFilter, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 
 //Structure for how and what the disaster cards would have 
 interface DisasterEvent {
@@ -140,6 +140,8 @@ const IncidentList: React.FC = () => {
   const [selectedEwmNumber, setSelectedEwmNumber] = useState<number | null>(null);
   const [filteredDisasters, setFilteredDisasters] = useState<DisasterEvent[]>(disasterData);
   const [showFilters, setShowFilters] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Parse coordinates from search term if possible
   const parseCoordinates = (input: string) => {
@@ -159,7 +161,6 @@ const IncidentList: React.FC = () => {
   // Calculate distance between two coordinates using Haversine formula
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     // If we're within 1 degree of latitude and longitude, consider it a match
-    // This is a simplified approach - 1 degree is approximately 111km at the equator
     return Math.abs(lat1 - lat2) <= 1 && Math.abs(lon1 - lon2) <= 1;
   };
 
@@ -208,6 +209,21 @@ const IncidentList: React.FC = () => {
     setFilteredDisasters(results);
   }, [searchTerm, searchCoordinates, selectedEwmNumber]);
 
+  const handleScroll = () => {
+    if (scrollContainerRef.current) {
+      setShowScrollTop(scrollContainerRef.current.scrollTop > 300);
+    }
+  };
+
+  const scrollToTop = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   // Get unique EWM categories present in our data for filtering options
   const availableCategories = Array.from(new Set(disasterData.map(disaster => disaster.ewm_number)));
 
@@ -253,29 +269,34 @@ const IncidentList: React.FC = () => {
           </div>
         )}
       </div>
-
-      <div className="incident-list">
+      <div 
+        className="incident-list-container" 
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+      >
         {filteredDisasters.length > 0 ? (
-          filteredDisasters.map((disaster) => (
-            <DisasterCard 
-              key={disaster.unique_id} 
-              unique_id={disaster.unique_id}
-              name={disaster.name}
-              status={disaster.status || "UNKNOWN"}
-              description={disaster.description}
-              location={disaster.location}
-              image={disaster.image || `/default-${(EWM_Categories[disaster.ewm_number] || "unknown").toLowerCase().replace(/\s+/g, '-')}.jpeg`}
-              category={EWM_Categories[disaster.ewm_number] || `Unknown (${disaster.ewm_number})`}
-              ewm_number = {disaster.ewm_number}
-              start_date={disaster.date_of_occurrence}
-              coordinates={disaster.coordinates}
-              source={disaster.source}
-              event_metadata={disaster.event_metadata}
-              weather_metadata={disaster.weather_metadata}
-              insights={disaster.insights}
-              resolvedDate={disaster.status === "RESOLVED" ? "June 6th, 2024" : undefined}
-            />
-          ))
+          <div className="incident-list">
+            {filteredDisasters.map((disaster) => (
+              <DisasterCard 
+                key={disaster.unique_id} 
+                unique_id={disaster.unique_id}
+                name={disaster.name}
+                status={disaster.status || "UNKNOWN"}
+                description={disaster.description}
+                location={disaster.location}
+                image={disaster.image || `/default-${(EWM_Categories[disaster.ewm_number] || "unknown").toLowerCase().replace(/\s+/g, '-')}.jpeg`}
+                category={EWM_Categories[disaster.ewm_number] || `Unknown (${disaster.ewm_number})`}
+                ewm_number = {disaster.ewm_number}
+                start_date={disaster.date_of_occurrence}
+                coordinates={disaster.coordinates}
+                source={disaster.source}
+                event_metadata={disaster.event_metadata}
+                weather_metadata={disaster.weather_metadata}
+                insights={disaster.insights}
+                resolvedDate={disaster.status === "RESOLVED" ? "June 6th, 2024" : undefined}
+              />
+            ))}
+          </div>
         ) : (
           <div className="no-events-message">
             <h3>No new events</h3>
@@ -283,6 +304,16 @@ const IncidentList: React.FC = () => {
           </div>
         )}
       </div>
+      
+      {showScrollTop && (
+        <button 
+          className="scroll-to-top"
+          onClick={scrollToTop}
+          aria-label="Scroll to top"
+        >
+          <FontAwesomeIcon icon={faChevronUp} />
+        </button>
+      )}
     </div>
   );
 };
