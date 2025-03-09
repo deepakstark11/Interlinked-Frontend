@@ -12,7 +12,9 @@ import {
     faBars,
     faMapMarkerAlt
 } from "@fortawesome/free-solid-svg-icons";
+import { Route, Routes } from "react-router-dom";
 import SidebarItem from "./SidebarItem";
+import FireMap from "./FireMap";
 import "../styles/Sidebar.css";
 
 const Sidebar: React.FC = () => {
@@ -23,7 +25,7 @@ const Sidebar: React.FC = () => {
         const handleResize = () => {
             setIsMobile(window.innerWidth <= 768);
             if (window.innerWidth <= 768) {
-                setIsCollapsed(true); // Force collapsed mode on mobile
+                setIsCollapsed(true);
             }
         };
 
@@ -33,7 +35,6 @@ const Sidebar: React.FC = () => {
 
     return (
         <div className={`sidenav ${isCollapsed ? "sidenav-collapsed" : ""}`}>
-            {/* Sidebar Logo Section with Hamburger Menu */}
             <div className="logo-container">
                 {!isCollapsed && !isMobile && (
                     <img src="/interlinkedlogo.jpg" alt="Interlinked Logo" className="sidebar-logo" />
@@ -46,9 +47,8 @@ const Sidebar: React.FC = () => {
                 </button>
             </div>
 
-            {/* Sidebar Navigation Items */}
             <ul className="sidenav-nav">
-                <SidebarItem icon={faTachometerAlt} text="Dashboard" isCollapsed={isCollapsed} />
+                <SidebarItem icon={faTachometerAlt} text="Dashboard" isCollapsed={isCollapsed} link="/"/>
                 <SidebarItem
                     icon={faFire}
                     text="Recent Incidents"
@@ -56,7 +56,8 @@ const Sidebar: React.FC = () => {
                     subItems={!isMobile ? [{ icon: faMapMarkerAlt, text: "Locate most recent incident" }] : undefined}
                 />
                 <SidebarItem icon={faUserShield} text="Active Duty Deployed" isCollapsed={isCollapsed} />
-                <SidebarItem icon={faMapMarkedAlt} text="District Map" isCollapsed={isCollapsed} />
+                
+                <SidebarItem icon={faMapMarkedAlt} text="District Map" isCollapsed={isCollapsed} link="/map" />
                 <SidebarItem icon={faExclamationTriangle} text="Probability & Risk" isCollapsed={isCollapsed} />
                 <SidebarItem icon={faBell} text="Announcements" isCollapsed={isCollapsed} />
                 <SidebarItem icon={faEnvelope} text="Messages" isCollapsed={isCollapsed} />
