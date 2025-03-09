@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faTachometerAlt,
@@ -10,16 +10,17 @@ import {
     faTruck,
     faExclamationTriangle,
     faBars,
+    faSignOutAlt,
     faMapMarkerAlt
 } from "@fortawesome/free-solid-svg-icons";
-// import { Route, Routes } from "react-router-dom";
+import { AuthContext } from "./AuthContext"; // Import Auth Context
 import SidebarItem from "./SidebarItem";
-// import FireMap from "./FireMap";
 import "../styles/Sidebar.css";
 
 const Sidebar: React.FC = () => {
     const [isCollapsed, setIsCollapsed] = useState(window.innerWidth <= 768);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const auth = useContext(AuthContext); // Get user role
 
     useEffect(() => {
         const handleResize = () => {
@@ -48,7 +49,14 @@ const Sidebar: React.FC = () => {
             </div>
 
             <ul className="sidenav-nav">
-                <SidebarItem icon={faTachometerAlt} text="Dashboard" isCollapsed={isCollapsed} link="/"/>
+                {/* Dashboard */}
+                <SidebarItem
+                    icon={faTachometerAlt}
+                    text="Dashboard"
+                    isCollapsed={isCollapsed}
+                    link={auth?.role === "admin" ? "/admin-dashboard" : "/"} // Admin goes to admin-dashboard, Fire Agency goes to Home
+                />
+
                 <SidebarItem
                     icon={faFire}
                     text="Recent Incidents"
@@ -57,12 +65,26 @@ const Sidebar: React.FC = () => {
                 />
                 <SidebarItem icon={faUserShield} text="Active Duty Deployed" isCollapsed={isCollapsed} />
                 
-                <SidebarItem icon={faMapMarkedAlt} text="District Map" isCollapsed={isCollapsed} link="/map" />
+                {/* District Map: Only visible to Fire Agency */}
+                {auth?.role === "fire-agency" && (
+                    <SidebarItem icon={faMapMarkedAlt} text="District Map" isCollapsed={isCollapsed} link="/map" />
+                )}
+
                 <SidebarItem icon={faExclamationTriangle} text="Probability & Risk" isCollapsed={isCollapsed} />
                 <SidebarItem icon={faBell} text="Announcements" isCollapsed={isCollapsed} />
                 <SidebarItem icon={faEnvelope} text="Messages" isCollapsed={isCollapsed} />
                 <SidebarItem icon={faTruck} text="Active Engines" isCollapsed={isCollapsed} />
                 <SidebarItem icon={faExclamationTriangle} text="Report Bug" isCollapsed={isCollapsed} />
+
+                {/* Logout Button as SidebarItem */}
+                {auth?.isAuthenticated && (
+                    <li className="sidenav-nav-item">
+                        <button onClick={auth.logout} className="logout-button">
+                            <FontAwesomeIcon icon={faSignOutAlt} />
+                            {!isCollapsed && <span>Logout</span>}
+                        </button>
+                    </li>
+                )}
             </ul>
         </div>
     );
