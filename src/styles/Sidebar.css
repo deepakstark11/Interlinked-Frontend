@@ -202,3 +202,43 @@
     font-size: 14px;
 }
 
+/* Ensure Logout button aligns with sidebar items */
+.sidenav-nav-item .logout-button {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    padding: 12px 15px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    text-align: left;
+    margin-left: 15px;
+    transition: background 0.3s ease;
+}
+
+.sidenav-nav-item .logout-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Icon spacing for Logout button */
+.sidenav-nav-item .logout-button svg {
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+/* Hide text when sidebar is collapsed */
+.sidenav-collapsed .logout-button span {
+    display: none;
+}
+
+.sidenav-collapsed .logout-button svg {
+    margin-right: 0;
+}
+
+/* Ensure Logout button is at the bottom */
+.sidenav-nav-item:last-child {
+    margin-top: auto;
+}
