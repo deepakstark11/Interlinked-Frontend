@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import DisasterCard from './DisasterCard';
 import '../styles/IncidentList.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faFilter, faChevronUp } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faFilter, faChevronUp, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
 
 //Structure for how and what the disaster cards would have 
 interface DisasterEvent {
@@ -161,7 +161,7 @@ const IncidentList: React.FC = () => {
   // Calculate distance between two coordinates using Haversine formula
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     // If we're within 1 degree of latitude and longitude, consider it a match
-    return Math.abs(lat1 - lat2) <= 1 && Math.abs(lon1 - lon2) <= 1;
+    return Math.abs(lat1 - lat2) <= 2 && Math.abs(lon1 - lon2) <= 2;
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -226,6 +226,42 @@ const IncidentList: React.FC = () => {
 
   // Get unique EWM categories present in our data for filtering options
   const availableCategories = Array.from(new Set(disasterData.map(disaster => disaster.ewm_number)));
+
+  //Following diff code segments to take in the city name
+  const [currentLocation, setCurrentLocation] = useState("LOS ANGELES");
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [locationInput, setLocationInput] = useState("");
+  const locationInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocationInput(e.target.value);
+  };
+
+  const startEditingLocation = () => {
+    setLocationInput(currentLocation);
+    setIsEditingLocation(true);
+    // Focus the input after it renders
+    setTimeout(() => {
+      if (locationInputRef.current) {
+        locationInputRef.current.focus();
+      }
+    }, 10);
+  };
+
+  const confirmLocationChange = () => {
+    if (locationInput.trim()) {
+      setCurrentLocation(locationInput.trim().toUpperCase());
+    }
+    setIsEditingLocation(false);
+  };
+
+  const handleLocationKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      confirmLocationChange();
+    } else if (e.key === 'Escape') {
+      setIsEditingLocation(false);
+    }
+  };
 
   return (
     <div className="incident-container">
