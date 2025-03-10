@@ -17,7 +17,7 @@ interface DisasterCardProps {
   event_metadata: Record<string, any>;
   weather_metadata: Record<string, any>;
   insights: Record<string, any>;
-  ewm_number: number;
+  // ewm_number: number;
   status: string;
   image: string;
 }
@@ -31,7 +31,7 @@ const DisasterCard: React.FC<DisasterCardProps> = ({
   location, 
   image,
   category,
-  ewm_number,
+  // ewm_number,
   start_date,
   coordinates 
 }) => {

@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import DisasterCard from './DisasterCard';
 import '../styles/IncidentList.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faFilter, faChevronUp, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faFilter, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 
 //Structure for how and what the disaster cards would have 
 interface DisasterEvent {
@@ -228,40 +228,40 @@ const IncidentList: React.FC = () => {
   const availableCategories = Array.from(new Set(disasterData.map(disaster => disaster.ewm_number)));
 
   //Following diff code segments to take in the city name
-  const [currentLocation, setCurrentLocation] = useState("LOS ANGELES");
-  const [isEditingLocation, setIsEditingLocation] = useState(false);
-  const [locationInput, setLocationInput] = useState("");
-  const locationInputRef = useRef<HTMLInputElement>(null);
+  // const [currentLocation, setCurrentLocation] = useState("LOS ANGELES");
+  // const [isEditingLocation, setIsEditingLocation] = useState(false);
+  // const [locationInput, setLocationInput] = useState("");
+  // const locationInputRef = useRef<HTMLInputElement>(null);
 
-  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocationInput(e.target.value);
-  };
+  // const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setLocationInput(e.target.value);
+  // };
 
-  const startEditingLocation = () => {
-    setLocationInput(currentLocation);
-    setIsEditingLocation(true);
-    // Focus the input after it renders
-    setTimeout(() => {
-      if (locationInputRef.current) {
-        locationInputRef.current.focus();
-      }
-    }, 10);
-  };
+  // const startEditingLocation = () => {
+  //   setLocationInput(currentLocation);
+  //   setIsEditingLocation(true);
+  //   // Focus the input after it renders
+  //   setTimeout(() => {
+  //     if (locationInputRef.current) {
+  //       locationInputRef.current.focus();
+  //     }
+  //   }, 10);
+  // };
 
-  const confirmLocationChange = () => {
-    if (locationInput.trim()) {
-      setCurrentLocation(locationInput.trim().toUpperCase());
-    }
-    setIsEditingLocation(false);
-  };
+  // const confirmLocationChange = () => {
+  //   if (locationInput.trim()) {
+  //     setCurrentLocation(locationInput.trim().toUpperCase());
+  //   }
+  //   setIsEditingLocation(false);
+  // };
 
-  const handleLocationKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      confirmLocationChange();
-    } else if (e.key === 'Escape') {
-      setIsEditingLocation(false);
-    }
-  };
+  // const handleLocationKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  //   if (e.key === 'Enter') {
+  //     confirmLocationChange();
+  //   } else if (e.key === 'Escape') {
+  //     setIsEditingLocation(false);
+  //   }
+  // };
 
   return (
     <div className="incident-container">
