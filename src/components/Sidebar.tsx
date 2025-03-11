@@ -54,7 +54,7 @@ const Sidebar: React.FC = () => {
                     icon={faTachometerAlt}
                     text="Dashboard"
                     isCollapsed={isCollapsed}
-                    link={auth?.role === "admin" ? "/admin-dashboard" : "/"} // Admin goes to admin-dashboard, Fire Agency goes to Home
+                    link={auth?.role === "admin" ? "/admin-dashboard" : "/dashboard"} // Admin goes to admin-dashboard, Fire Agency goes to dashboard
                 />
 
                 <SidebarItem
