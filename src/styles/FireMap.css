@@ -1,5 +1,3 @@
-
-
 .fire-info-container {
     position: fixed;
     bottom: 20px;
@@ -73,6 +71,99 @@
   100% {
     transform: scale(1);
     opacity: 0.8;
+  }
+}
+
+/* Main container for the fire map and details */
+.fire-map-container {
+  display: flex;
+  width: 100%;
+  height: 900px;
+  position: relative;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Map wrapper - will shrink when details are shown */
+.map-wrapper {
+  flex: 1;
+  height: 100%;
+  transition: all 0.3s ease-in-out;
+}
+
+/* When details are shown, adjust the map width */
+.fire-map-container.with-details .map-wrapper {
+  flex: 0.7; /* Takes 70% of the container when details are shown */
+}
+
+/* Details panel styling */
+.fire-details-panel {
+  width: 0;
+  height: 100%;
+  background-color: white;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+
+/* When details are shown, expand the panel */
+.fire-map-container.with-details .fire-details-panel {
+  width: 30%;
+  flex: 0.3;
+}
+
+/* Spinner container */
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 18px;
+  font-weight: bold;
+  color: #ff5733;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .fire-map-container {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .map-wrapper {
+    height: 450px;
+  }
+  
+  .fire-map-container.with-details .map-wrapper {
+    flex: none;
+    height: 450px;
+  }
+  
+  .fire-details-panel {
+    width: 100%;
+    height: 0;
+  }
+  
+  .fire-map-container.with-details .fire-details-panel {
+    width: 100%;
+    flex: none;
+    height: 450px;
+  }
+}
+
+@media (max-width: 480px) {
+  .map-wrapper {
+    height: 350px;
+  }
+  
+  .fire-map-container.with-details .map-wrapper {
+    height: 350px;
+  }
+  
+  .fire-map-container.with-details .fire-details-panel {
+    height: 400px;
   }
 }
 
