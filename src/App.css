@@ -2,22 +2,23 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  
 }
 
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
 
 .app-container {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
   width: 100%;
 }
 
 #root {
   width: 100%;
 }
-
-  
-
 
 .main-content {
   flex: 1;
@@ -26,20 +27,10 @@
   justify-content: flex-start;
   flex-direction: column;
   align-items: center;  /* Centers everything inside */
-  
   min-height: 100vh; /* Ensures full-page height */
-
-
-  
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(245, 245, 245, 0.8));
-backdrop-filter: blur(10px); /* Frosted glass effect */
-
-
-
-
-
-
-  }
+  backdrop-filter: blur(10px); /* Frosted glass effect */
+}
 
 h1 {
   text-align: center;
@@ -58,7 +49,6 @@ h1 {
   transition: all 0.3s ease;
 }
 
-
 /* Animated Underline Effect */
 h1::after {
   content: "";
@@ -74,7 +64,6 @@ h1::after {
 h1:hover::after {
   width: 80%;
 }
-
 
 .map-container {
   height: 600px; /* Ensure map has a visible height */
