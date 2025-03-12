@@ -13,17 +13,23 @@ interface FireEvent {
   date: string;
 }
 
-const containerStyle = {
-  width: "100%",
-  height: "900px",
-};
-
 const FireMap: React.FC = () => {
   const [fireLocations, setFireLocations] = useState<FireEvent[]>([]);
   const [visibleFireLocations, setVisibleFireLocations] = useState<FireEvent[]>([]);
   const [selectedFire, setSelectedFire] = useState<FireEvent | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  // Adjust container style based on whether a fire is selected
+  const containerStyle = {
+    width: "100%",
+    height: "900px",
+  };
+
+  const collapsedContainerStyle = {
+    width: "100%",
+    height: "900px",
+  };
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -108,12 +114,12 @@ const FireMap: React.FC = () => {
   );
 
   const mapOptions = {
-    mapTypeControl: false, // Removes Map/Satellite button
-    streetViewControl: false, // Removes Street View button
-    zoomControl: false, // Removes zoom buttons
-    fullscreenControl: false, // Removes full-screen button
-    rotateControl: false, // Removes rotation control
-    scaleControl: false, // Hides the scale indicator
+    mapTypeControl: false,
+    streetViewControl: false,
+    zoomControl: false,
+    fullscreenControl: false,
+    rotateControl: false,
+    scaleControl: false,
     styles: [
       {
           "featureType": "administrative",
@@ -194,32 +200,54 @@ const FireMap: React.FC = () => {
           ]
       }
   ]
-      
+  };
+
+  // Format the date for display
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // Handle closing the details panel
+  const handleCloseDetails = () => {
+    setSelectedFire(null);
   };
 
   return (
-    <React.Fragment>
-{!loading && userLocation ? (
-        <GoogleMap mapContainerStyle={containerStyle} center={userLocation} zoom={9}  options={mapOptions} >
-          {markerElements}
+    <div className={`fire-map-container ${selectedFire ? 'with-details' : ''}`}>
+      <div className="map-wrapper">
+        {!loading && userLocation ? (
+          <GoogleMap 
+            mapContainerStyle={selectedFire ? collapsedContainerStyle : containerStyle} 
+            center={userLocation} 
+            zoom={9}  
+            options={mapOptions}
+          >
+            {markerElements}
+          </GoogleMap>
+        ) : (
+          <div className="spinner-container">
+            <PulseLoader color="#ff5733" />
+            <p>Loading Fire Data...</p>
+          </div>
+        )}
+      </div>
 
-          {selectedFire && (
-            <div className="fire-info-container">
-              <LocationInfoBox info={{ id: selectedFire.id, title: selectedFire.title }} />
-              <button className="close-button" onClick={() => setSelectedFire(null)}>
-                Close
-              </button>
-            </div>
-          )}
-        </GoogleMap>
-      ) : (
-        <div className="spinner-container">
-          <PulseLoader color="#ff5733" />
-          <p>Loading Fire Data...</p>
+      {selectedFire && (
+        <div className="fire-details-panel">
+          <LocationInfoBox 
+            info={selectedFire} 
+            onClose={handleCloseDetails} 
+          />
         </div>
       )}
-    </React.Fragment>
-      
+    </div>
   );
 };
 
