@@ -30,8 +30,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px;
+    padding: 10px 15px;
     width: 100%;
+    margin-bottom: 10px;
 }
 
 /* Sidebar Logo */
@@ -41,6 +42,7 @@
     display: block;
     opacity: 1;
     transition: opacity 0.3s ease-in-out;
+    margin-right: 20px;
 }
 
 /* Sidebar Collapsed - Hide Logo */
@@ -63,6 +65,7 @@
     width: 40px;
     height: 40px;
     transition: background 0.3s ease;
+    margin-left: auto;
 }
 
 /* Ensure the Button Stays Inside */
@@ -72,7 +75,8 @@
 
 /* Sidebar Collapsed - Hamburger Menu Centered */
 .sidenav-collapsed .logo-toggle {
-    width: 100%;
+    width: 40px;
+    margin: 0 auto;
     justify-content: center;
 }
 
