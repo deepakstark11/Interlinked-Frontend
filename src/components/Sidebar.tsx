@@ -43,6 +43,7 @@ const Sidebar: React.FC = () => {
                 <button
                     className="logo-toggle"
                     onClick={() => !isMobile && setIsCollapsed(!isCollapsed)}
+                    aria-label="Toggle sidebar"
                 >
                     <FontAwesomeIcon icon={faBars} />
                 </button>
