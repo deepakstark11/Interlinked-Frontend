@@ -15,7 +15,7 @@ interface FireEvent {
 
 const containerStyle = {
   width: "100%",
-  height: "1010px",
+  height: "900px",
 };
 
 const FireMap: React.FC = () => {
