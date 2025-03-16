@@ -8,23 +8,6 @@
   position: relative;
 }
 
-.location-header {
-  text-align: center;
-  padding: 20px 0 10px;
-  position: relative;
-}
-
-.location-header h1 {
-  font-size: 2.2rem;
-  font-weight: 700;
-  margin: 0 0 5px 0;
-  letter-spacing: 1px;
-  cursor: pointer;
-  display: grid;
-  align-items: center;
-  transition: color 0.2s;
-}
-
 .edit-location-icon {
   margin-left: 10px;
   font-size: 0.6em;
@@ -275,6 +258,95 @@
   transform: translateY(-5px);
   background-color: #333;
 }
+
+/*filter icon css*/
+.filter-icons {
+  display: flex;
+  margin-right: 15px;
+  gap: 10px;
+}
+
+.filter-icon-button {
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-icon-button:hover {
+  background-color: #f0f0f0;
+  color: #000;
+}
+
+.filter-icon-button.active {
+  background-color: #000;
+  color: white;
+}
+
+/*search type button*/
+.search-type-button {
+  padding: 8px 15px;
+  background-color: #f0f0f0;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+}
+
+.search-type-button:hover:not(:disabled) {
+  background-color: #e0e0e0;
+}
+
+.search-type-button.active {
+  background-color: #000;
+  color: white;
+}
+
+.search-type-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/*Coordinates container CSS*/
+.coordinates-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  width: 100%;
+  margin-bottom: 15px;
+  background-color: #f8f8f8;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.coordinate-input-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 150px;
+}
+
+.coordinate-input-group label {
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.coordinate-input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 0.9rem;
+}
+
 
 /* Responsive adjustments */
 @media (max-width: 768px) {

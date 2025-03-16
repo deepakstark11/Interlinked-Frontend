@@ -181,37 +181,26 @@ const IncidentList: React.FC = () => {
     longitude: null
   });
 
-
+  //Filter states
   const [searchTerm, setSearchTerm] = useState("");
   const [searchCoordinates, setSearchCoordinates] = useState<{ latitude: number | null, longitude: number | null }>({
     latitude: null,
     longitude: null
   });
+  const [isSearchingByCoordinates, setIsSearchingByCoordinates] = useState(false);
+  const [latitudeInput, setLatitudeInput] = useState("");
+  const [longitudeInput, setLongitudeInput] = useState("");
   const [selectedEwmNumber, setSelectedEwmNumber] = useState<number | null>(null);
   const [filteredDisasters, setFilteredDisasters] = useState<DisasterEvent[]>(disasterData);
   const [selectedTimeFilter, setSelectedTimeFilter] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
   const [showTimeFilters, setShowTimeFilters] = useState(false);
+  const [showLocationSearch, setShowLocationSearch] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   //Refs
   const locationInputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  // Parse coordinates from search term if possible
-  const parseCoordinates = (input: string) => {
-    // Check for coordinate pattern like "34.1678,-118.1309"
-    const coordinatePattern = /^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/;
-    const match = input.match(coordinatePattern);
-
-    if (match) {
-      return {
-        latitude: parseFloat(match[1]),
-        longitude: parseFloat(match[3])
-      };
-    }
-    return { latitude: null, longitude: null };
-  };
 
   // Get user's current location on initial load
   useEffect(() => {
@@ -261,10 +250,54 @@ const IncidentList: React.FC = () => {
     setFilteredDisasters(results.length > 0 ? results : disasterData);
   };
 
+  // Parse coordinates from search term if possible
+  const parseCoordinates = (input: string) => {
+    // Check for coordinate pattern like "34.1678,-118.1309"
+    const coordinatePattern = /^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/;
+    const match = input.match(coordinatePattern);
+
+    if (match) {
+      return {
+        latitude: parseFloat(match[1]),
+        longitude: parseFloat(match[3])
+      };
+    }
+    return { latitude: null, longitude: null };
+  };
+
   // Calculate distance between two coordinates using Haversine formula
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     // If we're within 1 degree of latitude and longitude, consider it a match
     return Math.abs(lat1 - lat2) <= 2 && Math.abs(lon1 - lon2) <= 2;
+  };
+
+  // Calculate if coordinates match
+  const coordinatesMatch = (disaster: DisasterEvent, lat: string, lng: string) => {
+    if (!lat && !lng) return true;
+
+    const disasterLat = disaster.coordinates.latitude;
+    const disasterLng = disaster.coordinates.longitude;
+
+    // If only latitude is provided
+    if (lat && !lng) {
+      const userLat = parseFloat(lat);
+      if (isNaN(userLat)) return true;
+      return Math.abs(disasterLat - userLat) <= 2;
+    }
+
+    // If only longitude is provided
+    if (!lat && lng) {
+      const userLng = parseFloat(lng);
+      if (isNaN(userLng)) return true;
+      return Math.abs(disasterLng - userLng) <= 2;
+    }
+
+    // If both are provided
+    const userLat = parseFloat(lat);
+    const userLng = parseFloat(lng);
+    if (isNaN(userLat) || isNaN(userLng)) return true;
+    
+    return calculateDistance(disasterLat, disasterLng, userLat, userLng)
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -294,12 +327,103 @@ const IncidentList: React.FC = () => {
     if (!showTimeFilters) setShowFilters(false);
   };
 
+  const toggleLocationSearch = (isCoordinates: boolean) => {
+    setIsSearchingByCoordinates(isCoordinates);
+    setShowLocationSearch(true);
+    
+    // Clear the appropriate inputs when switching
+    if (isCoordinates) {
+      setSearchTerm("");
+    } else {
+      setLatitudeInput("");
+      setLongitudeInput("");
+    }
+  };
+
   // Clear all filters
   const clearFilters = () => {
     setSearchTerm("");
+    setLatitudeInput("");
+    setLongitudeInput("");
     setSearchCoordinates({ latitude: null, longitude: null });
     setSelectedTimeFilter("all");
     setSelectedEwmNumber(null);
+    setShowLocationSearch(false);
+    setIsSearchingByCoordinates(false);
+  };
+
+
+  const scrollToTop = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  };
+  
+  const handleScroll = () => {
+    if (scrollContainerRef.current) {
+      setShowScrollTop(scrollContainerRef.current.scrollTop > 300);
+    }
+  };
+
+  // Get unique EWM categories present in our data for filtering options
+  const availableCategories = Array.from(new Set(disasterData.map(disaster => disaster.ewm_number)));
+
+  //Following diff code segments to take in the city name
+  // const [currentLocation, setCurrentLocation] = useState("LOS ANGELES");
+  // const [isEditingLocation, setIsEditingLocation] = useState(false);
+  // const [locationInput, setLocationInput] = useState("");
+
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocationInput(e.target.value);
+  };
+
+  const startEditingLocation = () => {
+    setLocationInput(currentLocation);
+    setIsEditingLocation(true);
+    // Focus the input after it renders
+    setTimeout(() => {
+      if (locationInputRef.current) {
+        locationInputRef.current.focus();
+      }
+    }, 10);
+  };
+
+  const confirmLocationChange = () => {
+    if (locationInput.trim()) {
+      setCurrentLocation(locationInput.trim().toUpperCase());
+
+      //Update Search to filter by the new location
+      setSearchTerm(locationInput.trim().toUpperCase());
+      setSearchCoordinates({latitude: null, longitude: null})
+    }
+    setIsEditingLocation(false);
+  };
+
+  const handleLocationKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      confirmLocationChange();
+    } else if (e.key === 'Escape') {
+      setIsEditingLocation(false);
+    }
+  };
+
+  const handleSearchTermChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    
+    const coords = parseCoordinates(value);
+    setSearchCoordinates(coords);
+  };
+  
+  const handleLatitudeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLatitudeInput(e.target.value);
+  };
+  
+  const handleLongitudeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLongitudeInput(e.target.value);
   };
 
   // Apply filters effect
@@ -311,24 +435,31 @@ const IncidentList: React.FC = () => {
       results = results.filter(disaster => disaster.ewm_number === selectedEwmNumber);
     }
 
-    // Step 2: Apply location/coordinate filter if search term exists
-    if (searchTerm) {
-      if (searchCoordinates.latitude !== null && searchCoordinates.longitude !== null) {
+    // Step 2: Apply location/coordinate based on search choice
+    if (showLocationSearch) {
+      if (isSearchingByCoordinates) {
         // Filter by coordinates
         results = results.filter(disaster => 
-          calculateDistance(
-            searchCoordinates.latitude!, 
-            searchCoordinates.longitude!, 
-            disaster.coordinates.latitude, 
-            disaster.coordinates.longitude
+          coordinatesMatch(
+            disaster, 
+            latitudeInput, 
+            longitudeInput
           )
         );
         
-        // Update location name based on coordinates when available
-        getCityFromCoordinates(searchCoordinates.latitude, searchCoordinates.longitude)
-          .then(cityName => setCurrentLocation(cityName))
-          .catch(err => console.error("Error getting city name:", err));
-      } else {
+        // Update location name if coordinates are valid
+        if ((latitudeInput || longitudeInput) && results.length > 0) {
+          const lat = parseFloat(latitudeInput);
+          const long = parseFloat(longitudeInput);
+
+          if (!isNaN(lat) || !isNaN(long)) {
+            getCityFromCoordinates(isNaN(lat) ? 0 : lat, isNaN(long) ? 0 : long)
+            .then(cityName => setCurrentLocation(cityName))
+            .catch(err => console.error("Error getting city name:", err));
+          }
+        }
+        
+      } else if (searchTerm) {
         // Filter by location name or title
         const searchTermLower = searchTerm.toLowerCase();
         results = results.filter(disaster => 
@@ -377,101 +508,103 @@ const IncidentList: React.FC = () => {
     }
 
     setFilteredDisasters(results);
-  }, [searchTerm, searchCoordinates, selectedEwmNumber, selectedTimeFilter]);
-
-  const handleScroll = () => {
-    if (scrollContainerRef.current) {
-      setShowScrollTop(scrollContainerRef.current.scrollTop > 300);
-    }
-  };
-
-  const scrollToTop = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    }
-  };
-
-  // Get unique EWM categories present in our data for filtering options
-  const availableCategories = Array.from(new Set(disasterData.map(disaster => disaster.ewm_number)));
-
-  //Following diff code segments to take in the city name
-  // const [currentLocation, setCurrentLocation] = useState("LOS ANGELES");
-  // const [isEditingLocation, setIsEditingLocation] = useState(false);
-  // const [locationInput, setLocationInput] = useState("");
-
-  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocationInput(e.target.value);
-  };
-
-  const startEditingLocation = () => {
-    setLocationInput(currentLocation);
-    setIsEditingLocation(true);
-    // Focus the input after it renders
-    setTimeout(() => {
-      if (locationInputRef.current) {
-        locationInputRef.current.focus();
-      }
-    }, 10);
-  };
-
-  const confirmLocationChange = () => {
-    if (locationInput.trim()) {
-      setCurrentLocation(locationInput.trim().toUpperCase());
-
-      //Update Search to filter by the new location
-      setSearchTerm(locationInput.trim().toUpperCase());
-      setSearchCoordinates({latitude: null, longitude: null})
-    }
-    setIsEditingLocation(false);
-  };
-
-  const handleLocationKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      confirmLocationChange();
-    } else if (e.key === 'Escape') {
-      setIsEditingLocation(false);
-    }
-  };
+  }, [searchTerm, latitudeInput, longitudeInput, isSearchingByCoordinates, showLocationSearch, selectedEwmNumber, selectedTimeFilter]);
 
   return (
     <div className="incident-container">
-      <div className="location-header">
-          {/* <h1>LOCATION: {currentLocation}</h1> */}
-      </div>
+      {/* <div className="location-header">
+          <h1>LOCATION: {currentLocation}</h1>
+      </div> */}
       
       {/* Search and Filters */}
       <div className="search-container">
-        <div className="search-input-container">
-          <FontAwesomeIcon icon={faSearch} className="search-icon" />
-          <input
-            type="text"
-            placeholder="Search by location or coordinates (e.g., 34.1678,-118.1309)"
-            value={searchTerm}
-            onChange={handleSearchChange}
-            className="search-input"
-          />
-          <div className="filter-buttons">
-            <button 
-              className={`filter-toggle ${showFilters ? 'active' : ''}`}
-              onClick={toggleFilters}
-              aria-label="Toggle category filters"
-              title="Filter by category"
-            >
-              <FontAwesomeIcon icon={faFilter} />
-            </button>
-            <button 
-              className={`filter-toggle ${showTimeFilters ? 'active' : ''}`}
-              onClick={toggleTimeFilters}
-              aria-label="Toggle time filters"
-              title="Filter by time"
-            >
-              <FontAwesomeIcon icon={faCalendarAlt} />
-            </button>
+        {/* Main Search Bar */}
+        <div className="main-search-container">
+          <div className="search-input-container">
+            <FontAwesomeIcon icon={faSearch} className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search by location"
+              value={searchTerm}
+              onChange={handleSearchTermChange}
+              disabled={isSearchingByCoordinates}
+              className="search-input"
+            />
+            <div className="filter-icons">
+              <button 
+                className={`filter-icon-button ${showTimeFilters ? 'active' : ''}`}
+                onClick={toggleTimeFilters}
+                title="Filter by time"
+              >
+                <FontAwesomeIcon icon={faCalendarAlt} />
+              </button>
+              <button 
+                className={`filter-icon-button ${showFilters ? 'active' : ''}`}
+                onClick={toggleFilters}
+                title="Filter by category"
+              >
+                <FontAwesomeIcon icon={faFilter} />
+              </button>
+            </div>
+            <div className="search-type-toggle">
+              <button 
+                className={`search-type-button ${!isSearchingByCoordinates && showLocationSearch ? 'active' : ''}`}
+                onClick={() => toggleLocationSearch(false)}
+                disabled={!isSearchingByCoordinates && showLocationSearch}
+              >
+                Location
+              </button>
+              <button 
+                className={`search-type-button ${isSearchingByCoordinates ? 'active' : ''}`}
+                onClick={() => toggleLocationSearch(true)}
+                disabled={isSearchingByCoordinates}
+              >
+                Coordinates
+              </button>
+            </div>
           </div>
+
+          {/* Coordinate Search Inputs */}
+          {showLocationSearch && isSearchingByCoordinates && (
+            <div className="coordinates-container">
+              <div className="coordinate-input-group">
+                <label>Latitude:</label>
+                <input
+                  type="text"
+                  placeholder="e.g., 34.1678"
+                  value={latitudeInput}
+                  onChange={handleLatitudeChange}
+                  className="coordinate-input"
+                />
+              </div>
+              <div className="coordinate-input-group">
+                <label>Longitude:</label>
+                <input
+                  type="text"
+                  placeholder="e.g., -118.1309"
+                  value={longitudeInput}
+                  onChange={handleLongitudeChange}
+                  className="coordinate-input"
+                />
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Time Filter Dropdown */}
+        {showTimeFilters && (
+          <div className="time-filters">
+            {TIME_FILTERS.map(filter => (
+              <button 
+                key={filter.value}
+                className={`time-filter-button ${selectedTimeFilter === filter.value ? 'active' : ''}`}
+                onClick={() => handleTimeFilterSelect(filter.value)}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Category Filters */}
         {showFilters && (
@@ -494,23 +627,8 @@ const IncidentList: React.FC = () => {
           </div>
         )}
 
-        {/* Time Filters */}
-        {showTimeFilters && (
-          <div className="time-filters">
-            {TIME_FILTERS.map(filter => (
-              <button
-                key={filter.value}
-                className={`time-filter-button ${selectedTimeFilter === filter.value ? 'active' : ''}`}
-                onClick={() => handleTimeFilterSelect(filter.value)}
-              >
-                {filter.label}
-              </button>
-            ))}
-          </div>
-        )}
-
         {/* Clear Filters button - shown if any filter is active */}
-        {(selectedEwmNumber !== null || selectedTimeFilter !== "all" || searchTerm) && (
+        {(selectedEwmNumber !== null || selectedTimeFilter !== "all" || searchTerm || latitudeInput || longitudeInput) && (
           <button className="clear-filters-button" onClick={clearFilters}>
             Clear All Filters
           </button>
