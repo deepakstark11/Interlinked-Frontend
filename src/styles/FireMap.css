@@ -167,4 +167,24 @@
   }
 }
 
+/* Add these styles to your existing FireMap.css */
+
+.marker-animation-wrapper {
+  animation: markerFadeIn 0.5s ease-out;
+  transform-origin: bottom center;
+}
+
+@keyframes markerFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(15px) scale(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Make sure your existing styles are preserved */
+
 

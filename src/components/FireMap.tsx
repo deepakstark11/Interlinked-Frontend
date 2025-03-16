@@ -19,6 +19,12 @@ const FireMap: React.FC = () => {
   const [selectedFire, setSelectedFire] = useState<FireEvent | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [mapRef, setMapRef] = useState<google.maps.Map | null>(null);
+  const [mapBounds, setMapBounds] = useState<google.maps.LatLngBounds | null>(null);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [isUpdatingMarkers, setIsUpdatingMarkers] = useState<boolean>(false);
+  const boundsChangeTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const [skipMarkerUpdate, setSkipMarkerUpdate] = useState<boolean>(false);
 
   // Adjust container style based on whether a fire is selected
   const containerStyle = {
@@ -88,28 +94,139 @@ const FireMap: React.FC = () => {
     fetchFireData();
   }, []);
 
+  // Update visible fires when map bounds change
   useEffect(() => {
-    if (fireLocations.length > 0 && userLocation) {
-      const visibleFires = fireLocations.filter(
+    // Skip updates when we're just selecting/deselecting a marker
+    if (skipMarkerUpdate) {
+      setSkipMarkerUpdate(false);
+      return;
+    }
+    
+    if (fireLocations.length > 0 && mapBounds) {
+      setIsUpdatingMarkers(true);
+      
+      // Calculate new visible fires
+      const newVisibleFires = fireLocations.filter((fire) => {
+        const fireLatLng = new google.maps.LatLng(fire.lat, fire.lng);
+        return mapBounds.contains(fireLatLng);
+      });
+      
+      // First show loading spinner for a consistent time
+      setTimeout(() => {
+        // Hide spinner
+        setIsUpdatingMarkers(false);
+        
+        // Clear existing markers first to ensure animation works on re-entry
+        setVisibleFireLocations([]);
+        
+        // Add a small delay before showing new markers to create transition effect
+        setTimeout(() => {
+          setVisibleFireLocations(newVisibleFires);
+        }, 100);
+      }, 400);
+    } else if (fireLocations.length > 0 && userLocation && !mapBounds) {
+      // Fallback to user location if map bounds not yet available
+      setIsUpdatingMarkers(true);
+      
+      const newVisibleFires = fireLocations.filter(
         (fire) =>
           Math.abs(fire.lat - userLocation.lat) <= 1.0 &&
           Math.abs(fire.lng - userLocation.lng) <= 1.0
       );
-      setVisibleFireLocations(visibleFires);
+      
+      setTimeout(() => {
+        setIsUpdatingMarkers(false);
+        setVisibleFireLocations([]);
+        
+        setTimeout(() => {
+          setVisibleFireLocations(newVisibleFires);
+        }, 100);
+      }, 400);
     }
-  }, [fireLocations, userLocation]);
+  }, [fireLocations, mapBounds, userLocation, skipMarkerUpdate]);
 
+  // Debounced bounds change handler
+  const handleBoundsChanged = React.useCallback(() => {
+    if (!mapRef) return;
+    
+    // Clear any existing timeout
+    if (boundsChangeTimeoutRef.current) {
+      clearTimeout(boundsChangeTimeoutRef.current);
+    }
+    
+    // Set a new timeout to update bounds after dragging stops
+    boundsChangeTimeoutRef.current = setTimeout(() => {
+      if (mapRef) {
+        setMapBounds(mapRef.getBounds()!);
+      }
+    }, 300); // 300ms delay
+  }, [mapRef]);
+
+  // Handle map events
+  const onMapLoad = (map: google.maps.Map) => {
+    setMapRef(map);
+    
+    // Add event listeners directly to the map
+    map.addListener('idle', () => {
+      setMapBounds(map.getBounds()!);
+      setIsDragging(false);
+    });
+    
+    map.addListener('dragstart', () => {
+      setIsDragging(true);
+      setIsUpdatingMarkers(true);
+    });
+    
+    // Initial bounds setting
+    if (map.getBounds()) {
+      setMapBounds(map.getBounds()!);
+    }
+  };
+
+  // Clean up event listeners on unmount
+  useEffect(() => {
+    return () => {
+      if (boundsChangeTimeoutRef.current) {
+        clearTimeout(boundsChangeTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Optimize marker rendering with a custom click handler
+  const handleMarkerClick = (fire: FireEvent) => {
+    // Set flag to skip marker update
+    setSkipMarkerUpdate(true);
+    // Set selected fire
+    setSelectedFire(fire);
+  };
+
+  // Handle closing the details panel without re-rendering markers
+  const handleCloseDetails = () => {
+    // Set flag to skip marker update
+    setSkipMarkerUpdate(true);
+    // Clear selected fire
+    setSelectedFire(null);
+  };
+
+  // Optimize marker rendering
   const markerElements = useMemo(
-    () =>
-      visibleFireLocations.map((fire, index) => (
+    () => {
+      return visibleFireLocations.map((fire, index) => (
         <OverlayView
           key={`${fire.id}-${fire.lat}-${fire.lng}-${index}`}
           position={{ lat: fire.lat, lng: fire.lng }}
           mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
         >
-          <LocationMarker lat={fire.lat} lng={fire.lng} onClick={() => setSelectedFire(fire)} />
+          <div className="marker-animation-wrapper">
+            <LocationMarker 
+              lat={fire.lat} 
+              lng={fire.lng} 
+              onClick={() => handleMarkerClick(fire)} 
+            />
+          </div>
         </OverlayView>
-      )),
+      ));
+    },
     [visibleFireLocations]
   );
 
@@ -214,23 +331,29 @@ const FireMap: React.FC = () => {
     });
   };
 
-  // Handle closing the details panel
-  const handleCloseDetails = () => {
-    setSelectedFire(null);
-  };
-
   return (
     <div className={`fire-map-container ${selectedFire ? 'with-details' : ''}`}>
       <div className="map-wrapper">
         {!loading && userLocation ? (
-          <GoogleMap 
-            mapContainerStyle={selectedFire ? collapsedContainerStyle : containerStyle} 
-            center={userLocation} 
-            zoom={9}  
-            options={mapOptions}
-          >
-            {markerElements}
-          </GoogleMap>
+          <>
+            <GoogleMap 
+              mapContainerStyle={selectedFire ? collapsedContainerStyle : containerStyle} 
+              center={userLocation} 
+              zoom={9}  
+              options={mapOptions}
+              onLoad={onMapLoad}
+            >
+              {markerElements}
+            </GoogleMap>
+            
+            {/* Overlay spinner when updating markers */}
+            {isUpdatingMarkers && (
+              <div className="map-updating-overlay">
+                <PulseLoader color="#ff5733" size={15} />
+                <p>Updating fire data...</p>
+              </div>
+            )}
+          </>
         ) : (
           <div className="spinner-container">
             <PulseLoader color="#ff5733" />
