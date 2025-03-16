@@ -1,8 +1,9 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef, useContext} from 'react';
 import DisasterCard from './DisasterCard';
 import '../styles/IncidentList.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faFilter, faChevronUp } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faFilter, faChevronUp, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
+import { AuthContext } from './AuthContext';
 
 //Structure for how and what the disaster cards would have 
 interface DisasterEvent {
@@ -52,6 +53,14 @@ const EWM_Categories: { [ key : number ]: string} = {
   22: "Long Term Events"
 }
 
+const TIME_FILTERS = [
+  { label: "All Time", value: "all" },
+  { label: "Last 24 Hours", value: "day" },
+  { label: "Last Week", value: "week" },
+  { label: "Last Month", value: "month" },
+  { label: "Last Year", value: "year" }
+];
+
 const disasterData: DisasterEvent[] = [
   {
     unique_id: "WF-2024-542",
@@ -75,9 +84,9 @@ const disasterData: DisasterEvent[] = [
   {
     unique_id: "EQ-2024-539",
     name: "Chatsworth Earthquake",
-    description: "5.2 magnitude earthquake centered in Chatsworth",
+    description: "5.2 magnitude earthquake centered in Chatsworth that happened last month hypothetically",
     category: "Earthquake",
-    date_of_occurrence: "2024-06-18T08:15:00Z",
+    date_of_occurrence: "2025-02-20T08:15:00Z",
     location: "Chatsworth, CA 91311",
     coordinates: {
       latitude: 34.254070,
@@ -128,10 +137,51 @@ const disasterData: DisasterEvent[] = [
     ewm_number: 0,
     status: "RESOLVED",
     image: "/TopangaFire.jpeg"
+  },
+  {
+    unique_id: "WF-2024-543",
+    name: "Long Beach Tsunami",
+    description: "Hypothetical Tsunami in the Long Beach Area",
+    category: "Tsunami",
+    date_of_occurrence: "2025-03-10T00:00:00Z",
+    location: "5415 East Ocean Blvd. Long Beach, CA 90803",
+    coordinates: {
+      latitude: 33.7701,
+      longitude: -118.1937
+    },
+    source: "National Weather Service",
+    event_metadata: { Magnitude: 7.2, wave_height: "127.52ft" },
+    weather_metadata: {temperature: 69, humidity: "20%", wind: "36mph"},
+    insights: {risk_level: "high", evacuation_zones: ["Zone C", "Zone D"]},
+    ewm_number: 4,
+    status: "ONGOING",
+    image: "/LongBeachTsunami.jpeg"
   }
 ]
 
+// Mock function to get city name from coordinates
+const getCityFromCoordinates = async (lat: number, lng: number): Promise<string> => {
+  // In a real app, this would call a geocoding API
+  // For now, we'll simulate with a mock response
+  console.log(`Getting city name for coordinates: ${lat}, ${lng}`);
+  
+  // Mock response based on coordinate ranges
+  if (lat > 34 && lng < -118) return "LOS ANGELES";
+  if (lat > 30 && lat < 33) return "SAN DIEGO";
+  return "UNKNOWN LOCATION";
+};
+
 const IncidentList: React.FC = () => {
+  const authContext = useContext(AuthContext);
+  const [currentLocation, setCurrentLocation] = useState("LOADING...");
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [locationInput, setLocationInput] = useState("");
+  const [userCoordinates, setUserCoordinates] = useState<{latitude: number | null, longitude: number | null}>({
+    latitude: null,
+    longitude: null
+  });
+
+
   const [searchTerm, setSearchTerm] = useState("");
   const [searchCoordinates, setSearchCoordinates] = useState<{ latitude: number | null, longitude: number | null }>({
     latitude: null,
@@ -139,8 +189,13 @@ const IncidentList: React.FC = () => {
   });
   const [selectedEwmNumber, setSelectedEwmNumber] = useState<number | null>(null);
   const [filteredDisasters, setFilteredDisasters] = useState<DisasterEvent[]>(disasterData);
+  const [selectedTimeFilter, setSelectedTimeFilter] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
+  const [showTimeFilters, setShowTimeFilters] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+
+  //Refs
+  const locationInputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Parse coordinates from search term if possible
@@ -156,6 +211,54 @@ const IncidentList: React.FC = () => {
       };
     }
     return { latitude: null, longitude: null };
+  };
+
+  // Get user's current location on initial load
+  useEffect(() => {
+    const getUserLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords;
+            setUserCoordinates({ latitude, longitude });
+            
+            // Get city name from coordinates
+            try {
+              const cityName = await getCityFromCoordinates(latitude, longitude);
+              setCurrentLocation(cityName);
+              
+              // Initial filter by user's location
+              filterDisastersByLocation(latitude, longitude);
+            } catch (error) {
+              console.error("Error getting location name:", error);
+              setCurrentLocation("LOS ANGELES"); // Fallback
+            }
+          },
+          (error) => {
+            console.error("Error getting user location:", error);
+            setCurrentLocation("LOS ANGELES"); // Fallback
+          }
+        );
+      } else {
+        console.log("Geolocation is not supported by this browser.");
+        setCurrentLocation("LOS ANGELES"); // Fallback
+      }
+    };
+
+    getUserLocation();
+  }, []);
+
+  // Initial filter by user's location
+  const filterDisastersByLocation = (latitude: number, longitude: number) => {
+    const results = disasterData.filter(disaster => 
+      calculateDistance(
+        latitude,
+        longitude,
+        disaster.coordinates.latitude,
+        disaster.coordinates.longitude
+      )
+    );
+    setFilteredDisasters(results.length > 0 ? results : disasterData);
   };
 
   // Calculate distance between two coordinates using Haversine formula
@@ -176,14 +279,39 @@ const IncidentList: React.FC = () => {
     setSelectedEwmNumber(ewmNumber);
   };
 
+  const handleTimeFilterSelect = (timeFilter: string) => {
+    setSelectedTimeFilter(timeFilter);
+  };
+
+  // Handle filter toggles
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+    if (!showFilters) setShowTimeFilters(false);
+  };
+
+  const toggleTimeFilters = () => {
+    setShowTimeFilters(!showTimeFilters);
+    if (!showTimeFilters) setShowFilters(false);
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSearchCoordinates({ latitude: null, longitude: null });
+    setSelectedTimeFilter("all");
+    setSelectedEwmNumber(null);
+  };
+
+  // Apply filters effect
   useEffect(() => {
     let results = disasterData;
 
+    // Step 1: Filter by category (ewm_number) if selected
     if (selectedEwmNumber !== null) {
       results = results.filter(disaster => disaster.ewm_number === selectedEwmNumber);
     }
 
-    // Then filter by location or coordinates
+    // Step 2: Apply location/coordinate filter if search term exists
     if (searchTerm) {
       if (searchCoordinates.latitude !== null && searchCoordinates.longitude !== null) {
         // Filter by coordinates
@@ -195,6 +323,11 @@ const IncidentList: React.FC = () => {
             disaster.coordinates.longitude
           )
         );
+        
+        // Update location name based on coordinates when available
+        getCityFromCoordinates(searchCoordinates.latitude, searchCoordinates.longitude)
+          .then(cityName => setCurrentLocation(cityName))
+          .catch(err => console.error("Error getting city name:", err));
       } else {
         // Filter by location name or title
         const searchTermLower = searchTerm.toLowerCase();
@@ -203,11 +336,48 @@ const IncidentList: React.FC = () => {
           disaster.name.toLowerCase().includes(searchTermLower) ||
           disaster.description.toLowerCase().includes(searchTermLower)
         );
+        
+        // If filtered by location text, update the location header
+        if (results.length > 0) {
+          const locationParts = results[0].location.split(',');
+          if (locationParts.length > 0) {
+            const cityOrArea = locationParts[0].includes("CA-") 
+              ? locationParts[1]?.trim() || locationParts[0].trim()
+              : locationParts[0].trim();
+            setCurrentLocation(cityOrArea.toUpperCase());
+          }
+        }
       }
     }
 
+    // Step 3: Apply time filter if selected
+    if (selectedTimeFilter !== "all") {
+      const now = new Date();
+      let cutoffDate = new Date();
+      
+      switch(selectedTimeFilter) {
+        case "day":
+          cutoffDate.setDate(now.getDate() - 1);
+          break;
+        case "week":
+          cutoffDate.setDate(now.getDate() - 7);
+          break;
+        case "month":
+          cutoffDate.setMonth(now.getMonth() - 1);
+          break;
+        case "year":
+          cutoffDate.setFullYear(now.getFullYear() - 1);
+          break;
+      }
+      
+      results = results.filter(disaster => {
+        const eventDate = new Date(disaster.date_of_occurrence);
+        return eventDate >= cutoffDate;
+      });
+    }
+
     setFilteredDisasters(results);
-  }, [searchTerm, searchCoordinates, selectedEwmNumber]);
+  }, [searchTerm, searchCoordinates, selectedEwmNumber, selectedTimeFilter]);
 
   const handleScroll = () => {
     if (scrollContainerRef.current) {
@@ -228,10 +398,9 @@ const IncidentList: React.FC = () => {
   const availableCategories = Array.from(new Set(disasterData.map(disaster => disaster.ewm_number)));
 
   //Following diff code segments to take in the city name
-  const [currentLocation, setCurrentLocation] = useState("LOS ANGELES");
-  const [isEditingLocation, setIsEditingLocation] = useState(false);
-  const [locationInput, setLocationInput] = useState("");
-  const locationInputRef = useRef<HTMLInputElement>(null);
+  // const [currentLocation, setCurrentLocation] = useState("LOS ANGELES");
+  // const [isEditingLocation, setIsEditingLocation] = useState(false);
+  // const [locationInput, setLocationInput] = useState("");
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocationInput(e.target.value);
@@ -251,6 +420,10 @@ const IncidentList: React.FC = () => {
   const confirmLocationChange = () => {
     if (locationInput.trim()) {
       setCurrentLocation(locationInput.trim().toUpperCase());
+
+      //Update Search to filter by the new location
+      setSearchTerm(locationInput.trim().toUpperCase());
+      setSearchCoordinates({latitude: null, longitude: null})
     }
     setIsEditingLocation(false);
   };
@@ -265,33 +438,49 @@ const IncidentList: React.FC = () => {
 
   return (
     <div className="incident-container">
+      <div className="location-header">
+          {/* <h1>LOCATION: {currentLocation}</h1> */}
+      </div>
+      
+      {/* Search and Filters */}
       <div className="search-container">
         <div className="search-input-container">
           <FontAwesomeIcon icon={faSearch} className="search-icon" />
           <input
             type="text"
-            placeholder="Search by location, coordinates (e.g., 34.1678,-118.1309) or category of disaster"
+            placeholder="Search by location or coordinates (e.g., 34.1678,-118.1309)"
             value={searchTerm}
             onChange={handleSearchChange}
             className="search-input"
           />
-          <button 
-            className="filter-toggle"
-            onClick={() => setShowFilters(!showFilters)}
-            aria-label="Toggle filters"
-            name="Filter by disaster type"
-          >
-            <FontAwesomeIcon icon={faFilter} />
-          </button>
+          <div className="filter-buttons">
+            <button 
+              className={`filter-toggle ${showFilters ? 'active' : ''}`}
+              onClick={toggleFilters}
+              aria-label="Toggle category filters"
+              title="Filter by category"
+            >
+              <FontAwesomeIcon icon={faFilter} />
+            </button>
+            <button 
+              className={`filter-toggle ${showTimeFilters ? 'active' : ''}`}
+              onClick={toggleTimeFilters}
+              aria-label="Toggle time filters"
+              title="Filter by time"
+            >
+              <FontAwesomeIcon icon={faCalendarAlt} />
+            </button>
+          </div>
         </div>
 
+        {/* Category Filters */}
         {showFilters && (
           <div className="category-filters">
             <button
               className={`category-button ${selectedEwmNumber === null ? 'active' : ''}`}
               onClick={() => handleCategorySelect(null)}
             >
-              All Events
+              All Categories
             </button>
             {availableCategories.map(ewmNumber => (
               <button
@@ -304,7 +493,31 @@ const IncidentList: React.FC = () => {
             ))}
           </div>
         )}
+
+        {/* Time Filters */}
+        {showTimeFilters && (
+          <div className="time-filters">
+            {TIME_FILTERS.map(filter => (
+              <button
+                key={filter.value}
+                className={`time-filter-button ${selectedTimeFilter === filter.value ? 'active' : ''}`}
+                onClick={() => handleTimeFilterSelect(filter.value)}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Clear Filters button - shown if any filter is active */}
+        {(selectedEwmNumber !== null || selectedTimeFilter !== "all" || searchTerm) && (
+          <button className="clear-filters-button" onClick={clearFilters}>
+            Clear All Filters
+          </button>
+        )}
       </div>
+
+      {/* Incident List */}
       <div 
         className="incident-list-container" 
         ref={scrollContainerRef}
@@ -322,7 +535,7 @@ const IncidentList: React.FC = () => {
                 location={disaster.location}
                 image={disaster.image || `/default-${(EWM_Categories[disaster.ewm_number] || "unknown").toLowerCase().replace(/\s+/g, '-')}.jpeg`}
                 category={EWM_Categories[disaster.ewm_number] || `Unknown (${disaster.ewm_number})`}
-                ewm_number = {disaster.ewm_number}
+                ewm_number={disaster.ewm_number}
                 start_date={disaster.date_of_occurrence}
                 coordinates={disaster.coordinates}
                 source={disaster.source}
@@ -341,6 +554,7 @@ const IncidentList: React.FC = () => {
         )}
       </div>
       
+      {/* Scroll to top button */}
       {showScrollTop && (
         <button 
           className="scroll-to-top"

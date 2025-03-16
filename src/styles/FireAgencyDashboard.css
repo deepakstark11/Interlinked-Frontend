@@ -1,14 +1,15 @@
 .home-container {
     display: flex;
     flex-direction: column;
-   
     text-align: center;
+    margin-top: 0;
   }
   
   .centered-heading {
     font-size: 2rem;
     font-weight: bold;
     color: #ffffff; /* Adjust color if needed */
-    margin-bottom: 20px;
+    /* margin-bottom: 10px; */
+    margin-top: 40px;
   }
   
