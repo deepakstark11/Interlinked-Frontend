@@ -21,7 +21,7 @@ const Home: React.FC = () => {
         <div className="logo-container">
           <img src="/interlinked_logo_white.png" alt="Interlinked Logo" className="logo" />
         </div>
-        <p className="tagline">Advanced Wildfire Monitoring & Response System</p>
+        <p className="tagline">Bridging Tech-Driven Insights with Dynamic Disaster Response</p>
         <button 
           className="primary-button" 
           onClick={() => navigate("/login")}
