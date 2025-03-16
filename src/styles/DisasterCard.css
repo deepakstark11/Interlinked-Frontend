@@ -23,6 +23,21 @@
     font-family: 'Poppins', sans-serif;
     color: #333;
     min-width: 0; /* Prevents text overflow */
+    display: flex;
+    flex-direction: column;
+}
+
+.disaster-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.event-id {
+    font-size: 0.85rem;
+    color: #888;
+    font-weight: 500;
 }
 
 .disaster-info h2 {
@@ -30,11 +45,46 @@
     font-weight: 700;
     margin-bottom: 5px;
     word-wrap: break-word;
+    line-height: 1.2;
+}
+
+.disaster-description {
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+    color: #555;
+    line-height: 1.5;
+}
+
+.disaster-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.detail-item {
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 2px;
+}
+
+.detail-value {
+    color: #333;
 }
 
 .status {
     font-weight: bold;
     font-size: 1rem;
+    padding: 5px 10px;
+    border-radius: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .ongoing {
@@ -76,7 +126,6 @@
     max-width: 30%; /* Makes image responsive */
     height: auto;
     aspect-ratio: 16 / 11; /* Maintains proper aspect ratio */
-    
     border-radius: 10px;
     border: 2px solid #ddd;
     flex-shrink: 0; /* Prevents shrinking */
@@ -98,5 +147,15 @@
         width: 100%;
         max-width: 100%;
         aspect-ratio: 16 / 9;
+    }
+
+    .disaster-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .disaster-details {
+        grid-template-columns: 1fr;
     }
 }
