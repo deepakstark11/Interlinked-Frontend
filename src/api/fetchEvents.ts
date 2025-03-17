@@ -14,73 +14,102 @@ const s3 = new S3Client({
       secretAccessKey: import.meta.env.VITE_AWS_SECRET_KEY || "",
     },
   });
+
+  /**
+ * Fetch earthquake events from S3 and filter based on date and location.
+ * @param {number} daysAgo - Number of days to filter (e.g., 24 hours, 3 days, 7 days)
+ * @returns {Promise<DisasterEvent[]>} - List of formatted disaster events
+ */
   
-  export default async function fetchEvents() {
-    //console.log("Listing files in S3 bucket...");
-  
+  export default async function fetchEvents(daysAgo: number = 7) {
     try {
-      const listCommand = new ListObjectsV2Command({
-        Bucket: "historicnosql",
-        //Prefix: "USGS Earthquakes/",
-      });
-  
-      const listResponse = await s3.send(listCommand);
+        const listCommand = new ListObjectsV2Command({
+            Bucket: "historicnosql",
+        });
+
+    const listResponse = await s3.send(listCommand);
       if (!listResponse.Contents) {
-        console.error("No files found in the bucket.");
-        return [];
+          console.error("No files found in the bucket.");
+          return [];
       }
   
-      //console.log("Found files:", listResponse.Contents.map(obj => obj.Key));
-        const fetchFilePromises = listResponse.Contents.map(async (file) => {
+      const fetchFilePromises = listResponse.Contents.map(async (file) => {
         if (!file.Key) return null;
-  
+
         const getCommand = new GetObjectCommand({
-          Bucket: "historicnosql",
-          Key: file.Key,
+            Bucket: "historicnosql",
+            Key: file.Key,
         });
   
         try {
           const response = await s3.send(getCommand);
           const data = await response.Body?.transformToString();
           const event = JSON.parse(data || "{}");
+          const coordsString = event.metadata.coordinates || "";
+          const numericCoords = parseDecimalCoordinates(coordsString);
 
           // filter for region
 
           // if (!event.location || !event.location.includes("Canada")) {
           //   return null;
           // }
-  
+
+          const eventDate = new Date(event.date);
+          const cutoffDate = new Date();
+          cutoffDate.setDate(cutoffDate.getDate() - daysAgo);
+          // if (eventDate < cutoffDate) return null;
+
           return {
-            id: event.id,
-            title: event.title,
-            date: event.date.substring(0, 10),
-            location: event.location,
-            status: event.metadata.status,
-            magnitude: event.metadata.magnitude,
-          };
-        } catch (error) {
-          console.error(`Error fetching ${file.Key}:`, error);
-          return null;
-        }
-      });
-        const allEvents = (await Promise.all(fetchFilePromises)).filter(event => event !== null);
-        const sevenDaysAgo = new Date();
-        console.log("here", sevenDaysAgo);
-
-        // this is filter for the seven date's data, can be changed in the future
-
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-  
-      const filteredEvents = allEvents.filter(event => {
-        const eventDate = new Date(event.date);
-        console.log("Cutoff date:", sevenDaysAgo.toISOString());
-        return eventDate >= sevenDaysAgo;
-      });
-  
-      //console.log("Successfully fetched and filtered events:", filteredEvents);
-      return filteredEvents;
-    } catch (error) {
-      console.error("Error listing files in S3:", error);
-      return [];
-    }
+            unique_id: event.id || "Unknown ID",
+            name: event.metadata.title || "Unnamed Event",
+            description: event.description || "No description available.",
+            category: event.metadata.type || "Earthquake",
+            date_of_occurrence: event.date || "Unknown Date",
+            location: event.location || "Unknown Location",
+            coordinates: {
+              latitude: numericCoords[0] ?? 0,
+              longitude: numericCoords[1] ?? 0,
+            },
+            source: event.source || "USGS Earthquakes",
+            event_metadata: event.metadata || {},
+            weather_metadata: event.weather || {},
+            insights: event.insights || {},
+            ewm_number: 2, // Earthquakes are category 2 in EWM
+            status: event.metadata.status || "UNKNOWN",
+            image: "/ChatsworthEarthquake.jpeg",
+        };
+      } catch (error) {
+        console.error(`Error fetching ${file.Key}:`, error);
+        return null;
+      }
+    });
+    const allEvents = (await Promise.all(fetchFilePromises)).filter(event => event !== null);
+    return allEvents;
+  } catch (error) {
+    console.error("Error listing files in S3:", error);
+    return [];
   }
+}
+
+/**
+ * Extract numeric values from a string like:
+ * "[Decimal('34.0573333'), Decimal('-118.9003333'), Decimal('12.64')]"
+ * Returns e.g. [34.0573333, -118.9003333, 12.64]
+ */
+
+function parseDecimalCoordinates(coordsString: string): number[] {
+  const pattern = /Decimal\('([^']+)'\)/g;
+  const results: number[] = [];
+
+  let match = pattern.exec(coordsString);
+  while (match) {
+    // match[1] is the numeric portion inside the quotes
+    const numericVal = parseFloat(match[1]);
+    if (!isNaN(numericVal)) {
+      results.push(numericVal);
+    }
+    match = pattern.exec(coordsString);
+  }
+
+  return results;
+}

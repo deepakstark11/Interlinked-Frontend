@@ -4,6 +4,7 @@ import '../styles/IncidentList.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faFilter, faChevronUp, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 import { AuthContext } from './AuthContext';
+import fetchEvents from '../api/fetchEvents';
 
 //Structure for how and what the disaster cards would have 
 interface DisasterEvent {
@@ -61,103 +62,103 @@ const TIME_FILTERS = [
   { label: "Last Year", value: "year" }
 ];
 
-const disasterData: DisasterEvent[] = [
-  {
-    unique_id: "WF-2024-542",
-    name: "Altadena Fire",
-    description: "Major Wildfire Affecting the Altadena region",
-    category: "Wildfire",
-    date_of_occurrence: "2024-06-15T14:30:00Z",
-    location: "CA-2 Palmdale, CA 93550",
-    coordinates: {
-      latitude: 32.587010,
-      longitude: -118.127794
-    },
-    source: "California Department of Forestry and Fire Protection",
-    event_metadata: {acres_burned: 14117, containment: "70%"},
-    weather_metadata: {temperature: 98, humidity: "15%", wind: "25mph"},
-    insights: {risk_level: "high", evacuation_zones: ["Zone A", "Zone B"]},
-    ewm_number: 0,
-    status: "ONGOING",
-    image: "/AltadenaFire.jpeg"
-  },
-  {
-    unique_id: "EQ-2024-539",
-    name: "Chatsworth Earthquake",
-    description: "5.2 magnitude earthquake centered in Chatsworth that happened last month hypothetically",
-    category: "Earthquake",
-    date_of_occurrence: "2025-02-20T08:15:00Z",
-    location: "Chatsworth, CA 91311",
-    coordinates: {
-      latitude: 34.254070,
-      longitude: -118.594093
-    },
-    source: "USGS",
-    event_metadata: {magnitude: 5.2, depth: "8km"},
-    weather_metadata: {},
-    insights: {aftershock_probability: "60%", damage_assessment: "moderate"},
-    ewm_number: 2,
-    status: "RESOLVED",
-    image: "/ChatsworthEarthquake.jpeg"
-  },
-  {
-    unique_id: "WF-2024-541",
-    name: "San Gabriel Fire",
-    description: "Major Wildfire affecting the IRWINDALE Area",
-    category: "Wildfire",
-    date_of_occurrence: "2016-06-20T00:00:00Z",
-    location: "Irwindale, CA 91702",
-    coordinates: {
-      latitude: 30.168,
-      longitude: -115.9
-    },
-    source: "National Weather Service",
-    event_metadata: { acres_burned: 5399, containment: "100%" },
-    weather_metadata: {temperature: 98, humidity: "15%", wind: "23mph"},
-    insights: {risk_level: "high", evacuation_zones: ["Zone A", "Zone B"]},
-    ewm_number: 0,
-    status: "RESOLVED",
-    image: "/SanGabrielFire.jpeg"
-  },
-  {
-    unique_id: "WF-2024-540",
-    name: "Topanga Fire",
-    description: "Major Wildfire affecting the Topanga Area",
-    category: "Wildfire",
-    date_of_occurrence: "2024-06-06T00:00:00Z",
-    location: "20828 Entrada Rd, Topanga, CA 90290",
-    coordinates: {
-      latitude: 34.099800,
-      longitude: -118.595848
-    },
-    source: "National Weather Service",
-    event_metadata: { acres_burned: 16532, containment: "100%" },
-    weather_metadata: {temperature: 102, humidity: "22%", wind: "23mph"},
-    insights: {risk_level: "high", evacuation_zones: ["Zone A", "Zone B"]},
-    ewm_number: 0,
-    status: "RESOLVED",
-    image: "/TopangaFire.jpeg"
-  },
-  {
-    unique_id: "WF-2024-543",
-    name: "Long Beach Tsunami",
-    description: "Hypothetical Tsunami in the Long Beach Area",
-    category: "Tsunami",
-    date_of_occurrence: "2025-03-10T00:00:00Z",
-    location: "5415 East Ocean Blvd. Long Beach, CA 90803",
-    coordinates: {
-      latitude: 33.7701,
-      longitude: -118.1937
-    },
-    source: "National Weather Service",
-    event_metadata: { Magnitude: 7.2, wave_height: "127.52ft" },
-    weather_metadata: {temperature: 69, humidity: "20%", wind: "36mph"},
-    insights: {risk_level: "high", evacuation_zones: ["Zone C", "Zone D"]},
-    ewm_number: 4,
-    status: "ONGOING",
-    image: "/LongBeachTsunami.jpeg"
-  }
-]
+// const disasterData: DisasterEvent[] = [
+//   {
+//     unique_id: "WF-2024-542",
+//     name: "Altadena Fire",
+//     description: "Major Wildfire Affecting the Altadena region",
+//     category: "Wildfire",
+//     date_of_occurrence: "2024-06-15T14:30:00Z",
+//     location: "CA-2 Palmdale, CA 93550",
+//     coordinates: {
+//       latitude: 32.587010,
+//       longitude: -118.127794
+//     },
+//     source: "California Department of Forestry and Fire Protection",
+//     event_metadata: {acres_burned: 14117, containment: "70%"},
+//     weather_metadata: {temperature: 98, humidity: "15%", wind: "25mph"},
+//     insights: {risk_level: "high", evacuation_zones: ["Zone A", "Zone B"]},
+//     ewm_number: 0,
+//     status: "ONGOING",
+//     image: "/AltadenaFire.jpeg"
+//   },
+//   {
+//     unique_id: "EQ-2024-539",
+//     name: "Chatsworth Earthquake",
+//     description: "5.2 magnitude earthquake centered in Chatsworth that happened last month hypothetically",
+//     category: "Earthquake",
+//     date_of_occurrence: "2025-02-20T08:15:00Z",
+//     location: "Chatsworth, CA 91311",
+//     coordinates: {
+//       latitude: 34.254070,
+//       longitude: -118.594093
+//     },
+//     source: "USGS",
+//     event_metadata: {magnitude: 5.2, depth: "8km"},
+//     weather_metadata: {},
+//     insights: {aftershock_probability: "60%", damage_assessment: "moderate"},
+//     ewm_number: 2,
+//     status: "RESOLVED",
+//     image: "/ChatsworthEarthquake.jpeg"
+//   },
+//   {
+//     unique_id: "WF-2024-541",
+//     name: "San Gabriel Fire",
+//     description: "Major Wildfire affecting the IRWINDALE Area",
+//     category: "Wildfire",
+//     date_of_occurrence: "2016-06-20T00:00:00Z",
+//     location: "Irwindale, CA 91702",
+//     coordinates: {
+//       latitude: 30.168,
+//       longitude: -115.9
+//     },
+//     source: "National Weather Service",
+//     event_metadata: { acres_burned: 5399, containment: "100%" },
+//     weather_metadata: {temperature: 98, humidity: "15%", wind: "23mph"},
+//     insights: {risk_level: "high", evacuation_zones: ["Zone A", "Zone B"]},
+//     ewm_number: 0,
+//     status: "RESOLVED",
+//     image: "/SanGabrielFire.jpeg"
+//   },
+//   {
+//     unique_id: "WF-2024-540",
+//     name: "Topanga Fire",
+//     description: "Major Wildfire affecting the Topanga Area",
+//     category: "Wildfire",
+//     date_of_occurrence: "2024-06-06T00:00:00Z",
+//     location: "20828 Entrada Rd, Topanga, CA 90290",
+//     coordinates: {
+//       latitude: 34.099800,
+//       longitude: -118.595848
+//     },
+//     source: "National Weather Service",
+//     event_metadata: { acres_burned: 16532, containment: "100%" },
+//     weather_metadata: {temperature: 102, humidity: "22%", wind: "23mph"},
+//     insights: {risk_level: "high", evacuation_zones: ["Zone A", "Zone B"]},
+//     ewm_number: 0,
+//     status: "RESOLVED",
+//     image: "/TopangaFire.jpeg"
+//   },
+//   {
+//     unique_id: "WF-2024-543",
+//     name: "Long Beach Tsunami",
+//     description: "Hypothetical Tsunami in the Long Beach Area",
+//     category: "Tsunami",
+//     date_of_occurrence: "2025-03-10T00:00:00Z",
+//     location: "5415 East Ocean Blvd. Long Beach, CA 90803",
+//     coordinates: {
+//       latitude: 33.7701,
+//       longitude: -118.1937
+//     },
+//     source: "National Weather Service",
+//     event_metadata: { Magnitude: 7.2, wave_height: "127.52ft" },
+//     weather_metadata: {temperature: 69, humidity: "20%", wind: "36mph"},
+//     insights: {risk_level: "high", evacuation_zones: ["Zone C", "Zone D"]},
+//     ewm_number: 4,
+//     status: "ONGOING",
+//     image: "/LongBeachTsunami.jpeg"
+//   }
+// ]
 
 // Mock function to get city name from coordinates
 const getCityFromCoordinates = async (lat: number, lng: number): Promise<string> => {
@@ -174,12 +175,15 @@ const getCityFromCoordinates = async (lat: number, lng: number): Promise<string>
 const IncidentList: React.FC = () => {
   const authContext = useContext(AuthContext);
   const [currentLocation, setCurrentLocation] = useState("LOADING...");
+  const [disasterData, setDisasterData] = useState<DisasterEvent[]>([]);
   const [isEditingLocation, setIsEditingLocation] = useState(false);
   const [locationInput, setLocationInput] = useState("");
   const [userCoordinates, setUserCoordinates] = useState<{latitude: number | null, longitude: number | null}>({
     latitude: null,
     longitude: null
   });
+
+  const [isLoading, setIsLoading] = useState(true);
 
   //Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -217,7 +221,7 @@ const IncidentList: React.FC = () => {
               setCurrentLocation(cityName);
               
               // Initial filter by user's location
-              filterDisastersByLocation(latitude, longitude);
+              filterDisastersByLocation(latitude, longitude, disasterData);
             } catch (error) {
               console.error("Error getting location name:", error);
               setCurrentLocation("LOS ANGELES"); // Fallback
@@ -237,9 +241,34 @@ const IncidentList: React.FC = () => {
     getUserLocation();
   }, []);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        // default: get all data (0 => no date cutoff)
+        const events = await fetchEvents(0);
+        setDisasterData(events);
+        setFilteredDisasters(events);
+        if (userCoordinates.latitude !== null && userCoordinates.longitude !== null) {
+          filterDisastersByLocation(userCoordinates.latitude, userCoordinates.longitude, events);
+        }
+
+      } catch (error) {
+        console.error("Error fetching disaster events:", error);
+      }
+      setIsLoading(false);
+    };
+
+    fetchData();
+  }, [userCoordinates]);
+
   // Initial filter by user's location
-  const filterDisastersByLocation = (latitude: number, longitude: number) => {
-    const results = disasterData.filter(disaster => 
+  const filterDisastersByLocation = (
+    latitude: number,
+    longitude: number,
+    dataSource: DisasterEvent[]
+  ) => {
+    const results = dataSource.filter(disaster =>
       calculateDistance(
         latitude,
         longitude,
@@ -247,7 +276,7 @@ const IncidentList: React.FC = () => {
         disaster.coordinates.longitude
       )
     );
-    setFilteredDisasters(results.length > 0 ? results : disasterData);
+    setFilteredDisasters(results.length > 0 ? results : dataSource);
   };
 
   // Parse coordinates from search term if possible
