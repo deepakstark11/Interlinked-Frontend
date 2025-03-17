@@ -1,5 +1,6 @@
 import React from 'react';
 import '../styles/DisasterCard.css';
+import { useNavigate } from 'react-router-dom';
 
 interface DisasterCardProps {
   unique_id: string;
@@ -35,6 +36,8 @@ const DisasterCard: React.FC<DisasterCardProps> = ({
   start_date,
   coordinates 
 }) => {
+
+  const navigate = useNavigate();
 
   //start_date formatting:
   const formatDate = (dateString: string) => {
@@ -84,7 +87,12 @@ const DisasterCard: React.FC<DisasterCardProps> = ({
             </div>
           )}
         </div>
-        <button className='view-details'>VIEW DETAILS</button>
+        <button 
+          className='view-details' 
+          onClick={() => navigate(`/disaster/${unique_id}`)}
+        >
+          VIEW DETAILS
+        </button>
       </div>
       <img src={image} alt={`${name}`} className="disaster-image" />
     </div>

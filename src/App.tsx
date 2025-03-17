@@ -11,6 +11,8 @@ import AdminDashboard from "./components/AdminDashboard";
 import "./App.css";
 import FireAgencyDashboard from "./components/FireAgencyDashboard";
 import Home from "./components/Home";
+import DisasterDetails from './components/DisasterDetails';
+import IncidentList from './components/IncidentList';
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_REACT_APP_GOOGLE_MAPS_API_KEY;
 
@@ -32,6 +34,30 @@ const AppContent: React.FC = () => {
               <Route path="/map" element={<PrivateRoute element={<FireMap />} allowedRoles={["fire-agency", "admin"]} />} />
               <Route path="/admin-dashboard" element={<PrivateRoute element={<AdminDashboard />} allowedRoles={["admin"]} />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
+              <Route path="/" element={<IncidentList />} />
+              <Route path="/disaster/:id" element={<DisasterDetails disaster={{
+                image: "",
+                unique_id: "",
+                name: "",
+                description: "",
+                location: "",
+                coordinates: {
+                  latitude: 0,
+                  longitude: 0
+                },
+                weather_metadata: {
+                  temperature: 0,
+                  humidity: "",
+                  wind: ""
+                },
+                event_metadata: {
+                  acres_burned: undefined,
+                  containment: undefined
+                },
+                insights: {
+                  risk_level: ""
+                }
+              }} />} />
             </Routes>
           </div>
         </div>
