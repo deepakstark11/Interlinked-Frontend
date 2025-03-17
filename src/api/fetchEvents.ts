@@ -43,6 +43,12 @@ const s3 = new S3Client({
           const response = await s3.send(getCommand);
           const data = await response.Body?.transformToString();
           const event = JSON.parse(data || "{}");
+
+          // filter for region
+
+          // if (!event.location || !event.location.includes("Canada")) {
+          //   return null;
+          // }
   
           return {
             id: event.id,
@@ -59,6 +65,7 @@ const s3 = new S3Client({
       });
         const allEvents = (await Promise.all(fetchFilePromises)).filter(event => event !== null);
         const sevenDaysAgo = new Date();
+        console.log("here", sevenDaysAgo);
 
         // this is filter for the seven date's data, can be changed in the future
 
@@ -66,6 +73,7 @@ const s3 = new S3Client({
   
       const filteredEvents = allEvents.filter(event => {
         const eventDate = new Date(event.date);
+        console.log("Cutoff date:", sevenDaysAgo.toISOString());
         return eventDate >= sevenDaysAgo;
       });
   

@@ -1,5 +1,4 @@
-import { Icon } from "@iconify/react";
-import locationIcon from "@iconify/icons-mdi/fire-alert";
+import React from "react";
 
 interface LocationMarkerProps {
   lat: number;
@@ -10,15 +9,23 @@ interface LocationMarkerProps {
 const LocationMarker: React.FC<LocationMarkerProps> = ({ onClick }) => {
   return (
     <div
-      className="location-marker"
       onClick={onClick}
       style={{
-        transform: "translate(-50%, -50%)",
-        position: "absolute",
+        position: "relative",
         cursor: "pointer",
       }}
     >
-      <Icon icon={locationIcon} className="location-icon" width={30} height={30} />
+      {/* Custom fire icon with animation */}
+      <img
+        src="flames.png"
+        alt="Fire Icon"
+        width="35"
+        height="35"
+        style={{
+          filter: "drop-shadow(0px 0px 6px rgba(255, 69, 0, 0.8))",
+          animation: "pulse 1.5s infinite",
+        }}
+      />
     </div>
   );
 };

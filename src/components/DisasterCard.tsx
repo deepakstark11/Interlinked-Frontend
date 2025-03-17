@@ -1,5 +1,6 @@
 import React from 'react';
 import '../styles/DisasterCard.css';
+import { useNavigate } from 'react-router-dom';
 
 /* Modified here because of the database format
  * can change back in the future
@@ -15,12 +16,24 @@ import '../styles/DisasterCard.css';
 // }
 
 interface DisasterCardProps {
-  id: string;
-  title: string; 
-  status: string;
-  date: string; 
+  unique_id: string;
+  name: string;
+  description: string;
+  category: string;
+  start_date: string;
   location: string;
-  magnitude?: string; 
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  }
+  source: string;
+  resolvedDate?: string;
+  event_metadata: Record<string, any>;
+  weather_metadata: Record<string, any>;
+  insights: Record<string, any>;
+  ewm_number: number;
+  status: string;
+  image: string;
 }
 
 /* To make sure the disaster now can fit the files in database, I changed the format of the diaster card
@@ -28,19 +41,78 @@ interface DisasterCardProps {
  */
 
 
-const DisasterCard: React.FC<DisasterCardProps> = ({ id, title, status, date, location, magnitude }) => {
+const DisasterCard: React.FC<DisasterCardProps> = ({ 
+  unique_id, 
+  name, 
+  status, 
+  resolvedDate, 
+  description,
+  location, 
+  image,
+  category,
+  ewm_number,
+  start_date,
+  coordinates 
+}) => {
+
+  const navigate = useNavigate();
+
+  //start_date formatting:
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
   return (
     <div className="disaster-card">
       <div className="disaster-info">
-        <h2>{title}</h2>
-        <p className={status === "ongoing" ? "status ongoing" : "status resolved"}>
-          Status: {status}
+        <div className="disaster-header">
+          <span className="event-id">{unique_id}</span>
+          <span className={status == 'ONGOING' ? 'status ongoing' : 'status resolved'}>
+            {status}
+          </span>
+        </div>
+        <h2>{name}</h2>
+        <p className='disaster-description'>
+          {description}
         </p>
-        <p><strong>Magnitude:</strong> {magnitude || "N/A"}</p>
-        <p><strong>Date:</strong> {date.substring(0, 10)}</p> 
-        <p><strong>Location:</strong> {location}</p>
-        <button className="view-details">VIEW DETAILS</button>
+        <div className='disaster-details'>
+          <div className='detail-item'>
+            <span className='detail-label'>Category:</span>
+            <span className='detail-value'>{category}:</span>
+          </div>
+          <div className='detail-item'>
+            <span className='detail-label'>Start Date:</span>
+            <span className='detail-value'>{formatDate(start_date)}:</span>
+          </div>
+          <div className='detail-item'>
+            <span className='detail-label'>Location:</span>
+            <span className='detail-value'>{location}:</span>
+          </div>
+          <div className='detail-item'>
+            <span className='detail-label'>Coordinates:</span>
+            <span className='detail-value'>{coordinates.latitude.toFixed(4)}, {coordinates.longitude.toFixed(4)}</span>
+          </div>
+          {status == 'RESOLVED' && resolvedDate && (
+            <div className='detail-item'>
+              <span className='detail-label'>Resolved On:</span>
+              <span className='detail-value'>{resolvedDate}</span>
+            </div>
+          )}
+        </div>
+        <button 
+          className='view-details' 
+          onClick={() => navigate(`/disaster/${unique_id}`)}
+        >
+          VIEW DETAILS
+        </button>
       </div>
+      <img src={image} alt={`${name}`} className="disaster-image" />
     </div>
   );
 };
