@@ -1,7 +1,7 @@
-import React from 'react';
+import React, {useState, useRef} from 'react';
 import '../styles/DisasterDetails.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSun, faWind, faDroplet, faTriangleExclamation, faFireExtinguisher, faGauge } from '@fortawesome/free-solid-svg-icons';
+import { faSun, faWind, faDroplet, faTriangleExclamation, faFireExtinguisher, faGauge, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 
 interface DisasterDetailsProps {
   disaster: {
@@ -30,8 +30,32 @@ interface DisasterDetailsProps {
 }
 
 const DisasterDetails: React.FC<DisasterDetailsProps> = ({ disaster }) => {
+  //state var(s)
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  //ref
+  const detailContainerRef = useRef<HTMLDivElement>(null);
+  
+  const handleScroll = () => {
+    if (detailContainerRef.current) {
+      setShowScrollTop(detailContainerRef.current.scrollTop > 200);
+    }
+  };
+
+  const scrollToTop = () => {
+    if (detailContainerRef.current) {
+      detailContainerRef.current.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
-    <div className="disaster-details-container">
+    <div className="disaster-details-container"
+        ref={detailContainerRef}
+        onScroll={handleScroll}
+    >
       <header className="details-header">
         <div className="logo-container">
           <img src="/interlinkedlogo.jpg" alt="Interlinked Logo" className="logo" />
@@ -106,8 +130,22 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = ({ disaster }) => {
         {/* Integration with a map service like Google Maps would go here */}
         <div className="map-placeholder">
           <p>Map showing coordinates: {disaster.coordinates.latitude}, {disaster.coordinates.longitude}</p>
+          <div className="map-image-placeholder">
+            <p>Interactive map would be displayed here</p>
+          </div>
         </div>
       </section>
+
+      {/* Scroll to top button */}
+      {showScrollTop && (
+        <button 
+          className="scroll-to-top"
+          onClick={scrollToTop}
+          aria-label="Scroll to top"
+        >
+          <FontAwesomeIcon icon={faChevronUp} />
+        </button>
+      )}
     </div>
   );
 };
