@@ -1,7 +1,9 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import '../styles/DisasterDetails.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSun, faWind, faDroplet, faTriangleExclamation, faFireExtinguisher, faGauge, faChevronUp } from '@fortawesome/free-solid-svg-icons';
+import { GoogleMap, OverlayView } from "@react-google-maps/api";
+import { PulseLoader } from "react-spinners";
 
 interface DisasterDetailsProps {
   disaster: {
@@ -29,12 +31,26 @@ interface DisasterDetailsProps {
   };
 }
 
-const DisasterDetails: React.FC<DisasterDetailsProps> = ({ disaster }) => {
-  //state var(s)
-  const [showScrollTop, setShowScrollTop] = useState(false);
+const LocationMarker = ({lat, long, onClick}: {lat: number, long: number, onClick: () => void}) => {
+  return (
+    <div className='location-marker' onClick={onClick}>
+      <div className='pin-icon'>
+        <div className='pin-head'></div>
+        <div className='pin-tail'></div>
+      </div>
+      <div className='pulse'></div>
+    </div>
+  );
+};
 
-  //ref
+const DisasterDetails: React.FC<DisasterDetailsProps> = ({ disaster }) => {
+  //state and ref vars for scrolling
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const detailContainerRef = useRef<HTMLDivElement>(null);
+
+  //states for map
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapRef, setMapRef] = useState<google.maps.Map | null>(null);
   
   const handleScroll = () => {
     if (detailContainerRef.current) {
@@ -50,6 +66,123 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = ({ disaster }) => {
       });
     }
   };
+
+  //Map Config
+  const containerStyle = {
+    width: "100%",
+    height: "100%",
+    borderRadius: "10px",
+    overflow: "hidden"
+  };
+
+  const mapOptions = {
+    mapTypeCtrl: false,
+    streetViewCtrl: false,
+    zoomCtrl: false,
+    fullscreenCtrl: false,
+    rotateCtrl: false,
+    scaleCtrl: false,
+    styles: [
+      {
+        "featureType": "administrative",
+        "elementType": "lables.text.fill",
+        "stylers": [
+          {
+            "color": "#444444"
+          }
+        ]
+      },
+      {
+        "featureType": "landscape",
+        "elementType": "all",
+        "stylers": [
+            {
+                "color": "#f2f2f2"
+            }
+        ]
+      },
+      {
+          "featureType": "poi",
+          "elementType": "all",
+          "stylers": [
+              {
+                  "visibility": "off"
+              }
+          ]
+      },
+      {
+          "featureType": "road",
+          "elementType": "all",
+          "stylers": [
+              {
+                  "saturation": -100
+              },
+              {
+                  "lightness": 45
+              }
+          ]
+      },
+      {
+          "featureType": "road.highway",
+          "elementType": "all",
+          "stylers": [
+              {
+                  "visibility": "simplified"
+              }
+          ]
+      },
+      {
+          "featureType": "road.arterial",
+          "elementType": "labels.icon",
+          "stylers": [
+              {
+                  "visibility": "off"
+              }
+          ]
+      },
+      {
+          "featureType": "transit",
+          "elementType": "all",
+          "stylers": [
+              {
+                  "visibility": "off"
+              }
+          ]
+      },
+      {
+          "featureType": "water",
+          "elementType": "all",
+          "stylers": [
+              {
+                  "color": "#0465b0"
+              },
+              {
+                  "visibility": "on"
+              }
+          ]
+      }
+    ]
+  }
+
+  //load map
+  const onMapLoad = (map: google.maps.Map) => {
+    setMapRef(map);
+    setMapLoaded(true);
+  }
+
+  //format the coordinates for display
+  const formatCoordinates = (lat:number, long:number) => {
+    return `${lat.toFixed(4)}, ${long.toFixed(4)}`;
+  }
+
+  //handle marker click
+  const handleMarkerClick = () => {
+    /*
+      Could expand this to show more details or trigger an action
+      For now just console logging this
+    */
+    console.log("Marker Clicked");
+  }
 
   return (
     <div className="disaster-details-container"
@@ -127,12 +260,40 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = ({ disaster }) => {
       </section>
 
       <section className="map-section">
-        {/* Integration with a map service like Google Maps would go here */}
-        <div className="map-placeholder">
-          <p>Map showing coordinates: {disaster.coordinates.latitude}, {disaster.coordinates.longitude}</p>
-          <div className="map-image-placeholder">
-            <p>Interactive map would be displayed here</p>
-          </div>
+        <h2>Incident Location</h2>
+        <div className="map-info">
+          <p>Coordinates: {formatCoordinates(disaster.coordinates.latitude, disaster.coordinates.longitude)}</p>
+          <p>{disaster.location}</p>
+        </div>
+        <div className='map-container'>
+          <GoogleMap
+            mapContainerStyle={containerStyle}
+            center={{
+              lat: disaster.coordinates.latitude,
+              lng: disaster.coordinates.longitude
+            }}
+            zoom={12}
+            options={mapOptions}
+            onLoad={onMapLoad}
+          >
+            {mapLoaded && (
+              <OverlayView
+                position={{
+                  lat: disaster.coordinates.latitude,
+                  lng: disaster.coordinates.longitude
+                }}
+                mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+              >
+                <div className='marker-animation-wrapper'>
+                  <LocationMarker
+                    lat={disaster.coordinates.latitude}
+                    long={disaster.coordinates.longitude}
+                    onClick={handleMarkerClick}
+                  />
+                </div>
+              </OverlayView>
+            )}
+          </GoogleMap>
         </div>
       </section>
 
