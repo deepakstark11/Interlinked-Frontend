@@ -55,27 +55,37 @@ const Sidebar: React.FC = () => {
                     icon={faTachometerAlt}
                     text="Dashboard"
                     isCollapsed={isCollapsed}
-                    link={auth?.role === "admin" ? "/admin-dashboard" : "/dashboard"} // Admin goes to admin-dashboard, Fire Agency goes to dashboard
+                    link={"/dashboard"}
                 />
 
-                <SidebarItem
-                    icon={faFire}
-                    text="Recent Incidents"
-                    isCollapsed={isCollapsed}
-                    subItems={!isMobile ? [{ icon: faMapMarkerAlt, text: "Locate most recent incident" }] : undefined}
-                />
-                <SidebarItem icon={faUserShield} text="Active Duty Deployed" isCollapsed={isCollapsed} />
-                
-                {/* District Map: Only visible to Fire Agency */}
+                {/* District Specific Events: Only visible to Fire Agency */}
                 {auth?.role === "fire-agency" && (
-                    <SidebarItem icon={faMapMarkedAlt} text="District Map" isCollapsed={isCollapsed} link="/map" />
+                    <SidebarItem
+                    icon={faFire}
+                    text="District Incidents"
+                    isCollapsed={isCollapsed}
+                    subItems={!isMobile ? [
+                        {icon: faMapMarkerAlt, text: "Locate Ongoing Incidents"},
+                        {icon: faExclamationTriangle, text: "Create Active Incident",}
+                        {icon: faMapMarkedAlt, text: "District Map",}
+                    ] : undefined}
+                    />
                 )}
 
-                <SidebarItem icon={faExclamationTriangle} text="Probability & Risk" isCollapsed={isCollapsed} />
+                <SidebarItem icon={faTruck} text="Active Duty & Engines Deployed" isCollapsed={isCollapsed} />
+
+                <SidebarItem icon={faMapMarkedAlt} text="Ongoing Disaster Map" isCollapsed={isCollapsed} link="/map" />
+                <SidebarItem icon={faUserShield} text="Risk of Ignition" isCollapsed={isCollapsed} />
+
                 <SidebarItem icon={faBell} text="Announcements" isCollapsed={isCollapsed} />
                 <SidebarItem icon={faEnvelope} text="Messages" isCollapsed={isCollapsed} />
-                <SidebarItem icon={faTruck} text="Active Engines" isCollapsed={isCollapsed} />
-                <SidebarItem icon={faExclamationTriangle} text="Report Bug" isCollapsed={isCollapsed} />
+
+                <SidebarItem icon={faExclamationTriangle} text="Report a Bug" isCollapsed={isCollapsed} />
+
+                {/* Admin Dashboard: Only visible to Admins */}
+                {auth?.role === "admin" && (
+                    <SidebarItem icon={faMapMarkedAlt} text="Admin Settings" isCollapsed={isCollapsed} link="/admin-dashboard" />
+                )}
 
                 {/* Logout Button as SidebarItem */}
                 {auth?.isAuthenticated && (
