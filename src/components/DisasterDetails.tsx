@@ -1,9 +1,11 @@
 import React, {useState, useRef, useEffect} from 'react';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import '../styles/DisasterDetails.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSun, faWind, faDroplet, faTriangleExclamation, faFireExtinguisher, faGauge, faChevronUp } from '@fortawesome/free-solid-svg-icons';
-import { GoogleMap, OverlayView } from "@react-google-maps/api";
+import { GoogleMap, Marker, OverlayView } from "@react-google-maps/api";
 import { PulseLoader } from "react-spinners";
+import fetchDisasterById from '../api/fetchDisasterById';
 
 interface DisasterDetailsProps {
   disaster: {
@@ -31,19 +33,24 @@ interface DisasterDetailsProps {
   };
 }
 
+interface LocationMarkerProps {
+  lat: number;
+  lng: number;
+  onClick: () => void;
+}
+
 const LocationMarker = ({lat, long, onClick}: {lat: number, long: number, onClick: () => void}) => {
   return (
     <div className='location-marker' onClick={onClick}>
-      <div className='pin-icon'>
-        <div className='pin-head'></div>
-        <div className='pin-tail'></div>
+      <div className='marker-icon'>
+        <div className='marker-dot'></div>
+        <div className='marker-pulse'></div>
       </div>
-      <div className='pulse'></div>
     </div>
   );
 };
 
-const DisasterDetails: React.FC<DisasterDetailsProps> = ({ disaster }) => {
+const DisasterDetails: React.FC<DisasterDetailsProps> = () => {
   //state and ref vars for scrolling
   const [showScrollTop, setShowScrollTop] = useState(false);
   const detailContainerRef = useRef<HTMLDivElement>(null);
@@ -51,7 +58,53 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = ({ disaster }) => {
   //states for map
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapRef, setMapRef] = useState<google.maps.Map | null>(null);
+
+  // Get disaster ID from URL params
+  const {id} = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  // State for disaster data
+  const [loading, setLoading] = useState<boolean>(true);
+  const [disasterData, setDisasterData] = useState<DisasterDetailsProps['disaster'] | null>(null);
+  const [error, setError] = useState<string | null>(null);
   
+  //fetch disaster data by the ID...mainly the location 
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!id) {
+        setError("No disaster ID specified");
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      
+      try {
+        // Fetch disaster data using the ID
+        const data = await fetchDisasterById(id);
+        
+        // Check if data was found
+        if (data) {
+          setDisasterData(data);
+        } else {
+          setError("Disaster data not found. Please return to the incident list.");
+        }
+      } catch (err) {
+        console.error("Error fetching disaster details:", err);
+        setError("Failed to load disaster details. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
+  // Handle back button click
+  const handleBack = () => {
+    navigate(-1);
+  };
+
   const handleScroll = () => {
     if (detailContainerRef.current) {
       setShowScrollTop(detailContainerRef.current.scrollTop > 200);
@@ -76,12 +129,12 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = ({ disaster }) => {
   };
 
   const mapOptions = {
-    mapTypeCtrl: false,
-    streetViewCtrl: false,
-    zoomCtrl: false,
-    fullscreenCtrl: false,
-    rotateCtrl: false,
-    scaleCtrl: false,
+    mapTypeControl: false,
+    streetViewControl: false,
+    zoomControl: false,
+    fullscreenControl: false,
+    rotateControl: false,
+    scaleControl: false,
     styles: [
       {
         "featureType": "administrative",
@@ -118,7 +171,7 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = ({ disaster }) => {
                   "saturation": -100
               },
               {
-                  "lightness": 45
+                  "lightness": 50
               }
           ]
       },
@@ -172,7 +225,7 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = ({ disaster }) => {
 
   //format the coordinates for display
   const formatCoordinates = (lat:number, long:number) => {
-    return `${lat.toFixed(4)}, ${long.toFixed(4)}`;
+    return `${lat.toFixed(10)}, ${long.toFixed(10)}`;
   }
 
   //handle marker click
@@ -184,26 +237,52 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = ({ disaster }) => {
     console.log("Marker Clicked");
   }
 
+  //handle loading scenario on disaster details page
+  if (loading) {
+    return (
+      <div className="disaster-details-loading">
+        <PulseLoader color="#ff5733" size={15} />
+        <p>Loading disaster information...</p>
+      </div>
+    );
+  }
+
+  //uh oh, error happened
+  if (error || !disasterData) {
+    return (
+      <div className="disaster-details-error">
+        <h2>Error</h2>
+        <p>{error}</p>
+        <button onClick={handleBack} className="back-button">
+          Return to Incident List
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="disaster-details-container"
         ref={detailContainerRef}
         onScroll={handleScroll}
     >
+      <button onClick={handleBack} className="back-button">
+        ← Back to Incident List
+      </button>
       <header className="details-header">
         <div className="logo-container">
           <img src="/interlinkedlogo.jpg" alt="Interlinked Logo" className="logo" />
         </div>
         <div className="header-content">
           <h1>Viewing</h1>
-          <h2 className="disaster-name">{disaster.name}</h2>
+          <h2 className="disaster-name">{disasterData.name}</h2>
           <div className="location-time">
-            <h3>{disaster.location}</h3>
+            <h3>{disasterData.location}</h3>
             <p>Time (PST): {new Date().toLocaleTimeString()}</p>
           </div>
         </div>
         <img 
-          src={disaster.image || "/default-disaster-image.jpg"} 
-          alt={disaster.name} 
+          src={disasterData.image || "/default-disaster-image.jpg"} 
+          alt={disasterData.name} 
           className="disaster-thumbnail"
         />
       </header>
@@ -214,17 +293,17 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = ({ disaster }) => {
           <div className="condition-card">
             <FontAwesomeIcon icon={faSun} className="condition-icon" />
             <h3>Sunny</h3>
-            <p>Temperature: {disaster.weather_metadata.temperature}°</p>
+            <p>Temperature: {disasterData.weather_metadata.temperature}°</p>
             <p>H: 90° L: 64°</p>
           </div>
           <div className="condition-card">
             <FontAwesomeIcon icon={faWind} className="condition-icon" />
-            <h3>{disaster.weather_metadata.wind}</h3>
+            <h3>{disasterData.weather_metadata.wind}</h3>
             <p>100 MPH Gusts</p>
           </div>
           <div className="condition-card">
             <FontAwesomeIcon icon={faDroplet} className="condition-icon" />
-            <h3>{disaster.weather_metadata.humidity}</h3>
+            <h3>{disasterData.weather_metadata.humidity}</h3>
             <p>23% Humidity</p>
           </div>
           <div className="condition-card warning">
@@ -246,7 +325,7 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = ({ disaster }) => {
               <div className="metric">
                 <FontAwesomeIcon icon={faFireExtinguisher} className="metric-icon" />
                 <h4>Containment Status</h4>
-                <p>{disaster.event_metadata.containment || "N/A"}</p>
+                <p>{disasterData.event_metadata.containment || "N/A"}</p>
               </div>
               <div className="metric">
                 <FontAwesomeIcon icon={faGauge} className="metric-icon" />
@@ -262,32 +341,46 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = ({ disaster }) => {
       <section className="map-section">
         <h2>Incident Location</h2>
         <div className="map-info">
-          <p>Coordinates: {formatCoordinates(disaster.coordinates.latitude, disaster.coordinates.longitude)}</p>
-          <p>{disaster.location}</p>
+          <p>Coordinates: {formatCoordinates(disasterData.coordinates.latitude, disasterData.coordinates.longitude)}</p>
+          <p>{disasterData.location}</p>
         </div>
         <div className='map-container'>
           <GoogleMap
             mapContainerStyle={containerStyle}
             center={{
-              lat: disaster.coordinates.latitude,
-              lng: disaster.coordinates.longitude
+              lat: disasterData.coordinates.latitude,
+              lng: disasterData.coordinates.longitude
             }}
-            zoom={12}
+            zoom={10}
             options={mapOptions}
             onLoad={onMapLoad}
           >
+            {/* Added standard Google Maps marker as a fallback */}
+            {/* <Marker
+              position={{
+                lat: disasterData.coordinates.latitude,
+                lng: disasterData.coordinates.longitude
+              }}
+              onClick={handleMarkerClick}
+              icon={{
+                url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+                scaledSize: new window.google.maps.Size(50, 50),
+                anchor: new window.google.maps.Point(25, 25)
+              }}
+            /> */}
+
             {mapLoaded && (
               <OverlayView
                 position={{
-                  lat: disaster.coordinates.latitude,
-                  lng: disaster.coordinates.longitude
+                  lat: disasterData.coordinates.latitude,
+                  lng: disasterData.coordinates.longitude
                 }}
                 mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
               >
                 <div className='marker-animation-wrapper'>
                   <LocationMarker
-                    lat={disaster.coordinates.latitude}
-                    long={disaster.coordinates.longitude}
+                    lat={disasterData.coordinates.latitude}
+                    long={disasterData.coordinates.longitude}
                     onClick={handleMarkerClick}
                   />
                 </div>

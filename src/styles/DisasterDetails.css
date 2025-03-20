@@ -212,85 +212,94 @@
   border-radius: 10px;
   overflow: hidden;
   position: relative;
+  z-index: 1;
 }
 
-/* Location Marker Styles */
+/* Enhanced marker styles for better visibility */
 .location-marker {
   position: relative;
+  width: 40px;
+  height: 40px;
+  /* transform: translate(-50%, -100%); */
   cursor: pointer;
-  z-index: 2;
+  z-index: 1000 !important;
+  /* pointer-events: auto !important; */
 }
 
-.pin-icon {
-  position: relative;
-  width: 30px;
-  height: 30px;
-  transform: translate(-50%, -100%);
-}
-
-.pin-head {
+.marker-icon {
   position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 20px;
-  height: 20px;
+  top: 50%;
+  height: 50%;
+  transform: translate(-50%, -50%);
+  /* z-index: 1001 !important; */
+}
+
+.marker-dot {
+  width: 18px;
+  height: 18px;
   background-color: #ff5733;
   border: 2px solid white;
   border-radius: 50%;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
-}
-
-.pin-tail {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   position: absolute;
-  top: 15px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 15px;
-  background-color: #ff5733;
-  border-bottom-left-radius: 2px;
-  border-bottom-right-radius: 2px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transform: translate(-50%, -50%);
+  z-index: 10;
 }
 
-.pulse {
-  position: absolute;
-  top: 10px;
-  left: 15px;
-  transform: translate(-50%, -50%);
+.marker-pulse {
   width: 30px;
   height: 30px;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(255, 87, 51, 0.6);
   border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
   animation: pulse 1.5s infinite;
-  z-index: -1;
 }
 
 @keyframes pulse {
   0% {
-    transform: scale(0.5);
-    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.6;
+  }
+  70% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
   }
   100% {
-    transform: scale(2);
+    transform: translate(-50%, -50%) scale(1);
     opacity: 0;
+  }
+}
+
+@keyframes markerFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(15px) scale(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
 .marker-animation-wrapper {
-  animation: dropIn 0.5s ease-out;
+  animation: markerFadeIn 0.5s ease-out;
+  transform-origin: bottom center;
 }
 
-@keyframes dropIn {
-  0% {
-    transform: translateY(-20px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
+/* Add visual feedback when hovering over the marker */
+.location-marker:hover .pin-head {
+  background-color: #ff3300;
+  transform: translateX(-50%) scale(1.1);
+}
+
+.location-marker:hover .pin-tail {
+  background-color: #ff3300;
 }
 
 /* Loading state */

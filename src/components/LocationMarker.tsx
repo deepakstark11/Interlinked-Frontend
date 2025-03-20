@@ -4,21 +4,37 @@ interface LocationMarkerProps {
   lat: number;
   lng: number;
   onClick: () => void;
+  disasterType?: string;
 }
 
-const LocationMarker: React.FC<LocationMarkerProps> = ({ onClick }) => {
+const LocationMarker: React.FC<LocationMarkerProps> = ({ onClick, disasterType = 'wildfire' }) => {
+
+  const getPinImage = () => {
+    switch (disasterType.toLowerCase()) {
+      case "earthquake":
+        return "EarthquakePin.png"
+      case "wildfire":
+        return "WildfirePin.png"
+      default:
+        return "Wildfirepin.png"
+    }
+  };
+
   return (
     <div
       onClick={onClick}
       style={{
         position: "relative",
         cursor: "pointer",
+        width: "35px",
+        height: "35px",
+        transform: "translate(-50%, -50%)"
       }}
     >
       {/* Custom fire icon with animation */}
       <img
-        src="flames.png"
-        alt="Fire Icon"
+        src={getPinImage()}
+        alt={`${disasterType} Icon`}
         width="35"
         height="35"
         style={{
