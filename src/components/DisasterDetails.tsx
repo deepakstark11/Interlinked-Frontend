@@ -3,9 +3,10 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import '../styles/DisasterDetails.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSun, faWind, faDroplet, faTriangleExclamation, faFireExtinguisher, faGauge, faChevronUp } from '@fortawesome/free-solid-svg-icons';
-import { GoogleMap, Marker, OverlayView } from "@react-google-maps/api";
+import { GoogleMap, OverlayView, Marker } from "@react-google-maps/api";
 import { PulseLoader } from "react-spinners";
 import fetchDisasterById from '../api/fetchDisasterById';
+import LocationMarker from './LocationMarker';
 
 interface DisasterDetailsProps {
   disaster: {
@@ -13,6 +14,7 @@ interface DisasterDetailsProps {
     unique_id: string;
     name: string;
     description: string;
+    category: string;
     location: string;
     coordinates: {
       latitude: number;
@@ -33,23 +35,6 @@ interface DisasterDetailsProps {
   };
 }
 
-interface LocationMarkerProps {
-  lat: number;
-  lng: number;
-  onClick: () => void;
-}
-
-const LocationMarker = ({lat, long, onClick}: {lat: number, long: number, onClick: () => void}) => {
-  return (
-    <div className='location-marker' onClick={onClick}>
-      <div className='marker-icon'>
-        <div className='marker-dot'></div>
-        <div className='marker-pulse'></div>
-      </div>
-    </div>
-  );
-};
-
 const DisasterDetails: React.FC<DisasterDetailsProps> = () => {
   //state and ref vars for scrolling
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -67,7 +52,7 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [disasterData, setDisasterData] = useState<DisasterDetailsProps['disaster'] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  
+
   //fetch disaster data by the ID...mainly the location 
   useEffect(() => {
     const fetchData = async () => {
@@ -99,6 +84,61 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = () => {
 
     fetchData();
   }, [id]);
+
+  //fetch the disaster Type for the type of Pin on the map
+  const getDisasterType = () => {
+    if (!disasterData) return "wildfire"; // Default
+    
+    // If disasterType is explicitly defined in your data
+    if (disasterData.category) {
+      const category = disasterData.category.toLowerCase();
+      console.log("getDisasterType - Checking category:", category);
+      if (category.includes("earthquake")) {
+        console.log("getDisasterType - Category indicates earthquake");
+        return "earthquake";
+      } else if (category.includes("fire") || category.includes("wildfire")) {
+        console.log("getDisasterType - Category indicates wildfire");
+        return "wildfire";
+      } 
+    }
+
+    // Check disaster name or description for keywords
+    const nameAndDescription = `${disasterData.name} ${disasterData.description || ""}`.toLowerCase();
+    
+    if (nameAndDescription.includes("earthquake") || nameAndDescription.includes("quake") || nameAndDescription.includes("seismic")) {
+      console.log("getDisasterType - Identified as earthquake");
+      return "earthquake";
+    } else if (nameAndDescription.includes("fire") || nameAndDescription.includes("wildfire") || nameAndDescription.includes("blaze") || nameAndDescription.includes("burning")) {  
+      console.log("getDisasterType - Identified as wildfire");
+      return "wildfire";
+    }
+    
+    return "wildfire"; // Default to wildfire
+  };
+
+  const getMarkerIcon = () => {
+    const disasterType = getDisasterType();
+    console.log("getMarkerIcon - Function called");
+
+    console.log("getMarkerIcon - Disaster type determined as:", disasterType);
+
+    let iconPath;
+    if (disasterType.includes("earthquake")) {
+      iconPath = "/EarthquakePin.png";
+      console.log("getMarkerIcon - Using earthquake icon:", iconPath);
+    } else {
+      iconPath = "/WildfirePin.png";
+      console.log("getMarkerIcon - Using wildfire icon:", iconPath);
+    }
+
+    // Test if the icon file exists
+    const img = new Image();
+    img.onload = () => console.log(`getMarkerIcon - Icon successfully loaded: ${iconPath}`);
+    img.onerror = () => console.error(`getMarkerIcon - Icon failed to load: ${iconPath}`);
+    img.src = iconPath;
+    
+    return iconPath;
+  };
 
   // Handle back button click
   const handleBack = () => {
@@ -138,7 +178,7 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = () => {
     styles: [
       {
         "featureType": "administrative",
-        "elementType": "lables.text.fill",
+        "elementType": "labels.text.fill",
         "stylers": [
           {
             "color": "#444444"
@@ -353,22 +393,21 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = () => {
             }}
             zoom={10}
             options={mapOptions}
-            onLoad={onMapLoad}
+            onLoad={(map) => {
+              console.log("Map loaded successfully!");
+              setMapRef(map);
+              setMapLoaded(true);
+            }}
           >
-            {/* Added standard Google Maps marker as a fallback */}
-            {/* <Marker
+            {/* First try a simple marker to confirm basic functionality */}
+            <Marker
               position={{
                 lat: disasterData.coordinates.latitude,
                 lng: disasterData.coordinates.longitude
               }}
               onClick={handleMarkerClick}
-              icon={{
-                url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
-                scaledSize: new window.google.maps.Size(50, 50),
-                anchor: new window.google.maps.Point(25, 25)
-              }}
-            /> */}
-
+              visible={false} // Set to true to debug with a fallback marker
+            />
             {mapLoaded && (
               <OverlayView
                 position={{
@@ -376,14 +415,34 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = () => {
                   lng: disasterData.coordinates.longitude
                 }}
                 mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                // getPixelPositionOffset={(width, height) => {
+                //   console.log(`OverlayView offset calculation: width=${width}, height=${height}`);
+                //   // No need to adjust the position since the marker itself handles centering
+                //   return { x: 0, y: 0 };
+                // }}
               >
-                <div className='marker-animation-wrapper'>
-                  <LocationMarker
-                    lat={disasterData.coordinates.latitude}
-                    long={disasterData.coordinates.longitude}
+                
+                  {/* Debug indicator - this should be visible */}
+                  <Marker
+                        position={{
+                        lat: disasterData.coordinates.latitude,
+                        lng: disasterData.coordinates.longitude
+                    }}
                     onClick={handleMarkerClick}
+                    icon={{
+                      url: getMarkerIcon(),
+                      scaledSize: new window.google.maps.Size(60, 50), // Adjust size as needed
+                      origin: new window.google.maps.Point(0, 0),
+                      anchor: new window.google.maps.Point(30, 50) // Center point of the image (half of size)
+                    }}
                   />
-                </div>
+                  
+                  {/* <LocationMarker
+                    lat={disasterData.coordinates.latitude}
+                    lng={disasterData.coordinates.longitude}
+                    onClick={handleMarkerClick}
+                    disasterType={getDisasterType()}
+                  /> */}
               </OverlayView>
             )}
           </GoogleMap>

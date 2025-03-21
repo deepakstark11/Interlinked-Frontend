@@ -70,21 +70,43 @@ const FireMap: React.FC = () => {
           geometries: Geometry[];
         }
 
-        const wildfires: Event[] = data.events.filter((event: Event) =>
-          event.categories.some((category) => category.title === "Wildfires")
-        );
+        const disasters: Event[] = data.events;
 
-        const firePoints: FireEvent[] = wildfires.flatMap((event: Event) =>
-          event.geometries.map((geometry: Geometry) => ({
+        const disasterPoints: FireEvent[] = disasters.flatMap((event: Event) => {
+          // Determine disaster type
+          let disasterType = "wildfire"; // Default
+          
+          // Check if any category contains relevant keywords
+          const hasWildfire = event.categories.some(cat => 
+            cat.title.toLowerCase().includes("wildfire") || 
+            cat.title.toLowerCase().includes("fire")
+          );
+          
+          const hasEarthquake = event.categories.some(cat => 
+            cat.title.toLowerCase().includes("earthquake") || 
+            cat.title.toLowerCase().includes("seismic")
+          );
+          
+          // Also check the event title for keywords
+          const title = event.title.toLowerCase();
+          
+          if (hasEarthquake || title.includes("earthquake") || title.includes("quake")) {
+            disasterType = "earthquake";
+          } else if (hasWildfire || title.includes("fire") || title.includes("burn")) {
+            disasterType = "wildfire";
+          }
+
+          return event.geometries.map((geometry: Geometry) => ({
             id: event.id,
             title: event.title,
             lat: geometry.coordinates[1],
             lng: geometry.coordinates[0],
             date: geometry.date,
-          }))
-        );
+            type: disasterType
+          }));
+        });
 
-        setFireLocations(firePoints);
+        setFireLocations(disasterPoints);
       } catch (error) {
         console.error("Error fetching fire data:", error);
       }
@@ -222,6 +244,7 @@ const FireMap: React.FC = () => {
               lat={fire.lat} 
               lng={fire.lng} 
               onClick={() => handleMarkerClick(fire)} 
+              // disasterType={fetchFireData()}
             />
           </div>
         </OverlayView>

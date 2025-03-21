@@ -288,7 +288,7 @@
 }
 
 .marker-animation-wrapper {
-  animation: markerFadeIn 0.5s ease-out;
+  animation: "pulse 1.5s infinite";
   transform-origin: bottom center;
 }
 
@@ -346,4 +346,35 @@
 .scroll-to-top:hover {
   transform: translateY(-5px);
   background-color: #333;
+}
+
+
+
+/*
+Sample CSS
+*/
+
+/* Define simple fade-in animation */
+@keyframes markerFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Only add specific z-index for the marker itself, not all map elements */
+.location-marker {
+  z-index: 1000;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+
+/* Animation wrapper */
+.marker-animation-wrapper {
+  animation: markerFadeIn 0.5s ease-out;
 }
