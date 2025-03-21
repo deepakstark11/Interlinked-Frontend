@@ -246,7 +246,10 @@ const IncidentList: React.FC = () => {
       setIsLoading(true);
       try {
         // default: get all data (0 => no date cutoff)
-        const events = await fetchEvents(0);
+        const rawEvents = await fetchEvents(0);
+        //sort the date with start date (DESC)
+        const events = [...rawEvents].sort((a, b) => 
+          new Date (b.date_of_occurrence).getTime() - new Date(a.date_of_occurrence).getTime());
         setDisasterData(events);
         setFilteredDisasters(events);
         if (userCoordinates.latitude !== null && userCoordinates.longitude !== null) {
