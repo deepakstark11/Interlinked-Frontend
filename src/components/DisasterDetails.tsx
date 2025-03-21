@@ -1,12 +1,11 @@
 import React, {useState, useRef, useEffect} from 'react';
-import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import '../styles/DisasterDetails.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSun, faWind, faDroplet, faTriangleExclamation, faFireExtinguisher, faGauge, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { GoogleMap, OverlayView, Marker } from "@react-google-maps/api";
 import { PulseLoader } from "react-spinners";
 import fetchDisasterById from '../api/fetchDisasterById';
-import LocationMarker from './LocationMarker';
 
 interface DisasterDetailsProps {
   disaster: {
@@ -92,12 +91,12 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = () => {
     // If disasterType is explicitly defined in your data
     if (disasterData.category) {
       const category = disasterData.category.toLowerCase();
-      console.log("getDisasterType - Checking category:", category);
+      // console.log("getDisasterType - Checking category:", category);
       if (category.includes("earthquake")) {
-        console.log("getDisasterType - Category indicates earthquake");
+        // console.log("getDisasterType - Category indicates earthquake");
         return "earthquake";
       } else if (category.includes("fire") || category.includes("wildfire")) {
-        console.log("getDisasterType - Category indicates wildfire");
+        // console.log("getDisasterType - Category indicates wildfire");
         return "wildfire";
       } 
     }
@@ -106,10 +105,10 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = () => {
     const nameAndDescription = `${disasterData.name} ${disasterData.description || ""}`.toLowerCase();
     
     if (nameAndDescription.includes("earthquake") || nameAndDescription.includes("quake") || nameAndDescription.includes("seismic")) {
-      console.log("getDisasterType - Identified as earthquake");
+      // console.log("getDisasterType - Identified as earthquake");
       return "earthquake";
     } else if (nameAndDescription.includes("fire") || nameAndDescription.includes("wildfire") || nameAndDescription.includes("blaze") || nameAndDescription.includes("burning")) {  
-      console.log("getDisasterType - Identified as wildfire");
+      // console.log("getDisasterType - Identified as wildfire");
       return "wildfire";
     }
     
@@ -257,12 +256,6 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = () => {
     ]
   }
 
-  //load map
-  const onMapLoad = (map: google.maps.Map) => {
-    setMapRef(map);
-    setMapLoaded(true);
-  }
-
   //format the coordinates for display
   const formatCoordinates = (lat:number, long:number) => {
     return `${lat.toFixed(10)}, ${long.toFixed(10)}`;
@@ -399,15 +392,6 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = () => {
               setMapLoaded(true);
             }}
           >
-            {/* First try a simple marker to confirm basic functionality */}
-            <Marker
-              position={{
-                lat: disasterData.coordinates.latitude,
-                lng: disasterData.coordinates.longitude
-              }}
-              onClick={handleMarkerClick}
-              visible={false} // Set to true to debug with a fallback marker
-            />
             {mapLoaded && (
               <OverlayView
                 position={{
@@ -415,14 +399,7 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = () => {
                   lng: disasterData.coordinates.longitude
                 }}
                 mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-                // getPixelPositionOffset={(width, height) => {
-                //   console.log(`OverlayView offset calculation: width=${width}, height=${height}`);
-                //   // No need to adjust the position since the marker itself handles centering
-                //   return { x: 0, y: 0 };
-                // }}
               >
-                
-                  {/* Debug indicator - this should be visible */}
                   <Marker
                         position={{
                         lat: disasterData.coordinates.latitude,
@@ -436,7 +413,7 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = () => {
                       anchor: new window.google.maps.Point(30, 50) // Center point of the image (half of size)
                     }}
                   />
-                  
+                  {/*Make the location Marker work if you want else stick to the Marker implemented above*/}
                   {/* <LocationMarker
                     lat={disasterData.coordinates.latitude}
                     lng={disasterData.coordinates.longitude}
