@@ -12,6 +12,10 @@ const ReportIncident = () => {
         altitude: "",
     });
 
+    const [isTitleValid, setIsTitleValid] = useState(false);
+    const [isLatitudeValid, setIsLatitudeValid] = useState(false);
+    const [isLongitudeValid, setIsLongitudeValid] = useState(false);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prevState => ({
@@ -22,16 +26,30 @@ const ReportIncident = () => {
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log('Form Data:', formData);
-        setFormData({
-            title: "",
-            description: "",
-            category: "0",
-            location: "",
-            latitude: "",
-            longitude: "",
-            altitude: "",
-        });
+        const validations = {
+            title: !formData.title,
+            latitude: !formData.latitude,
+            longitude: !formData.longitude,
+        };
+
+        const hasErrors = validations.title || validations.latitude || validations.longitude;
+
+        setIsTitleValid(validations.title);
+        setIsLatitudeValid(validations.latitude);
+        setIsLongitudeValid(validations.longitude);
+
+        if (!hasErrors) {
+            console.log('Form Data:', formData);
+            setFormData({
+                title: "",
+                description: "",
+                category: "0",
+                location: "",
+                latitude: "",
+                longitude: "",
+                altitude: "",
+            });
+        }
     };
 
     return (
@@ -46,9 +64,11 @@ const ReportIncident = () => {
                             name="title"
                             placeholder="Title"
                             className="form-input"
-                            required
                             value={formData.title}
                             onChange={handleChange}
+                            style={{
+                                border: isTitleValid ? "2px solid red" : "1px solid #ccc"
+                            }}
                         />
                     </div>
                     <div className="form-group">
@@ -65,7 +85,6 @@ const ReportIncident = () => {
                         <label>Category<span style={{ color: 'red' }}>*</span></label>
                         <select 
                             className="form-mcq" 
-                            required 
                             name="category"
                             value={formData.category}
                             onChange={handleChange}
@@ -113,10 +132,12 @@ const ReportIncident = () => {
                             name="latitude"
                             placeholder="Latitude"
                             className="form-input"
-                            required
                             step="any"
                             value={formData.latitude}
                             onChange={handleChange}
+                            style={{
+                                border: isLatitudeValid ? "2px solid red" : "1px solid #ccc"
+                            }}
                         />
                         <label>Longitude<span style={{ color: 'red' }}>*</span></label>
                         <input
@@ -124,10 +145,12 @@ const ReportIncident = () => {
                             name="longitude"
                             placeholder="Longitude"
                             className="form-input"
-                            required
                             step="any"
                             value={formData.longitude}
                             onChange={handleChange}
+                            style={{
+                                border: isLongitudeValid ? "2px solid red" : "1px solid #ccc"
+                            }}
                         />
                         <label>Altitude</label>
                         <input
