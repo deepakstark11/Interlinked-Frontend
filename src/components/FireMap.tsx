@@ -29,12 +29,12 @@ const FireMap: React.FC = () => {
   // Adjust container style based on whether a fire is selected
   const containerStyle = {
     width: "100%",
-    height: "900px",
+    height: "94vh",
   };
 
   const collapsedContainerStyle = {
     width: "100%",
-    height: "900px",
+    height: "94vh",
   };
 
   useEffect(() => {

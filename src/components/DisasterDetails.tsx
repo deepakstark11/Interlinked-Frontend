@@ -302,7 +302,7 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = () => {
         ← Back to Incident List
       </button>
       <header className="details-header">
-        <div className="logo-container">
+        <div className="logo-container-disaster">
           <img src="/interlinkedlogo.jpg" alt="Interlinked Logo" className="logo" />
         </div>
         <div className="header-content">
