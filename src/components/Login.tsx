@@ -1,7 +1,8 @@
-import React, { useState, useContext, useEffect } from "react";
-import { AuthContext } from "./AuthContext";
-// import { useNavigate } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+//import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "../styles/Login.css"; // Import the new CSS file
+import { AuthContext } from "./AuthContext";
 
 const Login: React.FC = () => {
   const [credentials, setCredentials] = useState({ username: "", password: "" });
@@ -9,7 +10,7 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const auth = useContext(AuthContext);
-  // const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   // Clear error when credentials change
   useEffect(() => {
@@ -19,6 +20,12 @@ const Login: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+
+   
+
+
+
     
     try {
       // Simulate network delay for better UX feedback
@@ -51,11 +58,15 @@ const Login: React.FC = () => {
     }
   }, []);
 
+  
+
+  
+
   return (
     <div className="login-page">
       <div className="login-container">
         <div className="login-box">
-          <div className="logo-container">
+          <div className="logo-container-login">
             <img src="/interlinked_logo_white.png" alt="Interlinked Logo" className="company-logo" />
           </div>
           <h1>Welcome</h1>
@@ -93,7 +104,10 @@ const Login: React.FC = () => {
                 />
                 <span>Remember me</span>
               </label>
-              <a href="#" className="forgot-link">Forgot password?</a>
+              <Link to="/forgot-password" className="forgot-password-link">
+  Forgot Password?
+</Link>
+              
             </div>
             
             <button 

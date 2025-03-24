@@ -84,7 +84,7 @@ html, body, #root {
 
 /* Premium logo styling with glow effect */
 .logo {
-  width: 320px;
+  width: 320px !important;
   height: auto;
   filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5));
 }

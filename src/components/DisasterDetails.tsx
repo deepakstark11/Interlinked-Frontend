@@ -1,7 +1,7 @@
+import { faDroplet, faFireExtinguisher, faGauge, faSun, faTriangleExclamation, faWind } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import '../styles/DisasterDetails.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSun, faWind, faDroplet, faTriangleExclamation, faFireExtinguisher, faGauge } from '@fortawesome/free-solid-svg-icons';
 
 interface DisasterDetailsProps {
   disaster: {
@@ -33,7 +33,7 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = ({ disaster }) => {
   return (
     <div className="disaster-details-container">
       <header className="details-header">
-        <div className="logo-container">
+        <div className="logo-container-disaster">
           <img src="/interlinkedlogo.jpg" alt="Interlinked Logo" className="logo" />
         </div>
         <div className="header-content">
