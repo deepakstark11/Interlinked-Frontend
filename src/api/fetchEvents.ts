@@ -16,8 +16,8 @@ import { S3Client, ListObjectsV2Command, GetObjectCommand } from "@aws-sdk/clien
 const s3 = new S3Client({
     region: import.meta.env.VITE_AWS_REGION || "us-east-2",
     credentials: {
-      accessKeyId: "AKIAQUFLQIGONIUTKWJM",
-      secretAccessKey: "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",
+      accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY || "",
+      secretAccessKey: import.meta.env.VITE_AWS_SECRET_KEY || "",
     },
   });
 
