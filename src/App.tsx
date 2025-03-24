@@ -43,6 +43,7 @@ const AppContent: React.FC = () => {
                 unique_id: "",
                 name: "",
                 description: "",
+                category: "",
                 location: "",
                 coordinates: {
                   latitude: 0,

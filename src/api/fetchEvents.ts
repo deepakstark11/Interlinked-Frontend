@@ -6,7 +6,13 @@
 
 
 import { S3Client, ListObjectsV2Command, GetObjectCommand } from "@aws-sdk/client-s3";
-  
+  /*
+    VITE_AWS_ACCESS_KEY=AKIAQUFLQIGONIUTKWJM
+    VITE_AWS_SECRET_KEY=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
+    VITE_AWS_REGION=us-east-2
+    VITE_S3_BUCKET=historicnosql
+    VITE_S3_PREFIX=/
+  */
 const s3 = new S3Client({
     region: import.meta.env.VITE_AWS_REGION || "us-east-2",
     credentials: {
