@@ -26,7 +26,7 @@
 }
 
 /* Logo Container */
-.logo-container {
+.logo-container-sidebar{
     display: flex;
     align-items: center;
     justify-content: space-between;

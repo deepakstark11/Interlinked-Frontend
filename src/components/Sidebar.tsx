@@ -1,21 +1,21 @@
-import React, { useState, useEffect, useContext } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-    faTachometerAlt,
-    faFire,
-    faMapMarkedAlt,
-    faUserShield,
+    faBars,
     faBell,
     faEnvelope,
-    faTruck,
     faExclamationTriangle,
-    faBars,
+    faFire,
+    faMapMarkedAlt,
+    faMapMarkerAlt,
     faSignOutAlt,
-    faMapMarkerAlt
+    faTachometerAlt,
+    faTruck,
+    faUserShield
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useContext, useEffect, useState } from "react";
+import "../styles/Sidebar.css";
 import { AuthContext } from "./AuthContext"; // Import Auth Context
 import SidebarItem from "./SidebarItem";
-import "../styles/Sidebar.css";
 
 const Sidebar: React.FC = () => {
     const [isCollapsed, setIsCollapsed] = useState(window.innerWidth <= 768);
@@ -36,7 +36,7 @@ const Sidebar: React.FC = () => {
 
     return (
         <div className={`sidenav ${isCollapsed ? "sidenav-collapsed" : ""}`}>
-            <div className="logo-container">
+            <div className="logo-container-sidebar">
                 {!isCollapsed && !isMobile && (
                     <img src="/interlinkedlogo.jpg" alt="Interlinked Logo" className="sidebar-logo" />
                 )}
