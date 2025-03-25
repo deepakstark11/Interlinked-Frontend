@@ -314,8 +314,8 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = () => {
           </div>
         </div>
         <img 
-          src={disaster.image || "/AltadenaFire.jpeg"} 
-          alt={disaster.name} 
+          src={disasterData.image || "/AltadenaFire.jpeg"} 
+          alt={disasterData.name} 
           className="disaster-thumbnail"
         />
       </header>
@@ -380,17 +380,17 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = () => {
                 <div className="dropdown-item">
                   <FontAwesomeIcon icon={faTemperatureHigh} className="dropdown-icon" />
                   <h4>Temperature</h4>
-                  <p>{disaster.weather_metadata.temperature}° (High: 90° Low: 64°)</p>
+                  <p>{disasterData.weather_metadata.temperature}° (High: 90° Low: 64°)</p>
                 </div>
                 <div className="dropdown-item">
                   <FontAwesomeIcon icon={faWind} className="dropdown-icon" />
                   <h4>Wind Speed</h4>
-                  <p>{disaster.weather_metadata.wind} with 100 MPH Gusts</p>
+                  <p>{disasterData.weather_metadata.wind} with 100 MPH Gusts</p>
                 </div>
                 <div className="dropdown-item">
                   <FontAwesomeIcon icon={faDroplet} className="dropdown-icon" />
                   <h4>Humidity</h4>
-                  <p>{disaster.weather_metadata.humidity} (23%)</p>
+                  <p>{disasterData.weather_metadata.humidity} (23%)</p>
                 </div>
                 <div className="dropdown-item">
                   <FontAwesomeIcon icon={faFire} className="dropdown-icon" />
@@ -400,18 +400,18 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = () => {
                 <div className="dropdown-item">
                   <FontAwesomeIcon icon={faFireExtinguisher} className="dropdown-icon" />
                   <h4>Containment Status</h4>
-                  <p>{disaster.event_metadata.containment || "N/A"}</p>
+                  <p>{disasterData.event_metadata.containment || "N/A"}</p>
                 </div>
                 <div className="dropdown-item">
                   <FontAwesomeIcon icon={faGauge} className="dropdown-icon" />
                   <h4>Fire Severity</h4>
                   <p>8/10 - Severe with potential for escalation</p>
                 </div>
-                {disaster.event_metadata.acres_burned && (
+                {disasterData.event_metadata.acres_burned && (
                   <div className="dropdown-item">
                     <FontAwesomeIcon icon={faFire} className="dropdown-icon" />
                     <h4>Acres Burned</h4>
-                    <p>{disaster.event_metadata.acres_burned.toLocaleString()} acres</p>
+                    <p>{disasterData.event_metadata.acres_burned.toLocaleString()} acres</p>
                   </div>
                 )}
               </div>
