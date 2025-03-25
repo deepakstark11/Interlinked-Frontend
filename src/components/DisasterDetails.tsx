@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
-import '../styles/DisasterDetails.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSun, faWind, faDroplet, faTriangleExclamation, faFireExtinguisher, faGauge, faChevronDown, faChevronUp, faTemperatureHigh, faFire } from '@fortawesome/free-solid-svg-icons';
 import React, {useState, useRef, useEffect} from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../styles/DisasterDetails.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSun, faWind, faDroplet, faTriangleExclamation, faFireExtinguisher, faGauge, faChevronDown, faChevronUp, faTemperatureHigh, faFire } from '@fortawesome/free-solid-svg-icons';
 import { GoogleMap, OverlayView, Marker } from "@react-google-maps/api";
 import { PulseLoader } from "react-spinners";
 import fetchDisasterById from '../api/fetchDisasterById';
