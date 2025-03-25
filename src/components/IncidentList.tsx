@@ -203,9 +203,18 @@ const IncidentList: React.FC = () => {
   const [showLocationSearch, setShowLocationSearch] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
+   // Paging
+   const [currentPage, setCurrentPage] = useState(1);
+   const eventsPerPage = 15;
+   const indexOfLastEvent = currentPage * eventsPerPage;
+   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
+   const currentEvents = filteredDisasters.slice(indexOfFirstEvent, indexOfLastEvent);
+   const totalPages = Math.ceil(filteredDisasters.length / eventsPerPage);
+
   //Refs
   const locationInputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
 
   // Get user's current location on initial load
   useEffect(() => {
@@ -247,7 +256,10 @@ const IncidentList: React.FC = () => {
       setIsLoading(true);
       try {
         // default: get all data (0 => no date cutoff)
-        const events = await fetchEvents(0);
+        const rawEvents = await fetchEvents(0);
+        //sort the date with start date (DESC)
+        const events = [...rawEvents].sort((a, b) => 
+          new Date (b.date_of_occurrence).getTime() - new Date(a.date_of_occurrence).getTime());
         setDisasterData(events);
         setFilteredDisasters(events);
         if (userCoordinates.latitude !== null && userCoordinates.longitude !== null) {
@@ -673,7 +685,7 @@ const IncidentList: React.FC = () => {
       >
         {filteredDisasters.length > 0 ? (
           <div className="incident-list">
-            {filteredDisasters.map((disaster) => (
+            {currentEvents.map((disaster) => (
               <DisasterCard 
                 key={disaster.unique_id} 
                 unique_id={disaster.unique_id}
@@ -701,6 +713,27 @@ const IncidentList: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Paging Button */ }
+      {totalPages > 0 && (
+        <div className="paging-container">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled = {currentPage === 1}
+          >
+            Prev
+          </button>
+          <span className="page-indicator">
+            {currentPage} / {totalPages}
+          </span>
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled = {currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
       
       {/* Scroll to top button */}
       {showScrollTop && (

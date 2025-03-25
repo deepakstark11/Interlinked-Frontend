@@ -39,22 +39,23 @@ interface DisasterCardProps {
 /* To make sure the disaster now can fit the files in database, I changed the format of the diaster card
  * Can be changed in the future to add more details (such as description and image)
  */
-
-
 const DisasterCard: React.FC<DisasterCardProps> = ({ 
   unique_id, 
   name, 
   status, 
-  resolvedDate, 
   description,
   location, 
   image,
   category,
   ewm_number,
   start_date,
-  coordinates 
+  coordinates,
+  source,
+  event_metadata,
+  weather_metadata,
+  insights,
+  resolvedDate
 }) => {
-
   const navigate = useNavigate();
 
   //start_date formatting:
@@ -68,6 +69,7 @@ const DisasterCard: React.FC<DisasterCardProps> = ({
       minute: '2-digit'
     })
   }
+
   return (
     <div className="disaster-card">
       <div className="disaster-info">
