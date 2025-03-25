@@ -10,6 +10,7 @@ import FireMap from "./components/FireMap";
 import ForgotPassword from "./components/ForgotPassword";
 import Home from "./components/Home";
 import IncidentList from './components/IncidentList';
+import ReportIncident from './components/ReportIncident';
 import Login from "./components/Login";
 import PrivateRoute from "./components/PrivateRoute";
 import Sidebar from "./components/Sidebar";
@@ -38,6 +39,7 @@ const AppContent: React.FC = () => {
               <Route path="/admin-dashboard" element={<PrivateRoute element={<AdminDashboard />} allowedRoles={["admin"]} />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
               <Route path="/" element={<IncidentList />} />
+              <Route path="/report-incident" element={<ReportIncident />} />
               <Route path="/disaster/:id" element={<DisasterDetails disaster={{
                 image: "",
                 unique_id: "",

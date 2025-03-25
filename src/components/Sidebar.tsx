@@ -66,8 +66,9 @@ const Sidebar: React.FC = () => {
                     isCollapsed={isCollapsed}
                     subItems={!isMobile ? [
                         {icon: faMapMarkerAlt, text: "Locate Ongoing Incidents"},
-                        {icon: faExclamationTriangle, text: "Create Active Incident"},
-                        {icon: faMapMarkedAlt, text: "District Map"}
+                        {icon: faExclamationTriangle, text: "Create Active Incident", link: "/report-incident"},
+                        {icon: faMapMarkedAlt, text: "District Map"},
+
                     ] : undefined}
                     />
                 )}
