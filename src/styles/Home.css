@@ -79,7 +79,8 @@ html, body, #root {
 /* Logo container */
 .logo-container {
   position: relative;
-  margin-bottom: 50px;
+  margin: auto;
+  padding-bottom: 24px;
 }
 
 /* Premium logo styling with glow effect */

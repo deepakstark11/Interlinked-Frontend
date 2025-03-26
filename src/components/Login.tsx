@@ -12,43 +12,11 @@ const Login: React.FC = () => {
   const auth = useContext(AuthContext);
   //const navigate = useNavigate();
 
-  // Clear error when credentials change
+  // Clear error when credentials change  
   useEffect(() => {
     if (error) setError(null);
   }, [credentials]);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-
-   
-
-
-
-    
-    try {
-      // Simulate network delay for better UX feedback
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      if (auth?.login(credentials.username, credentials.password)) {
-        setError(null);
-        // If remember me is checked, you could store this in localStorage
-        if (rememberMe) {
-          localStorage.setItem("rememberedUsername", credentials.username);
-        } else {
-          localStorage.removeItem("rememberedUsername");
-        }
-      } else {
-        setError("Invalid username or password. Please try again.");
-      }
-    } catch (err) {
-      setError("An error occurred during login. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  
   // Load remembered username if available
   useEffect(() => {
     const savedUsername = localStorage.getItem("rememberedUsername");
@@ -58,9 +26,21 @@ const Login: React.FC = () => {
     }
   }, []);
 
-  
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
 
-  
+    const success = await auth?.login(credentials.username, credentials.password);
+    if (!success) {
+      setError("Invalid username or password.");
+    } else if (rememberMe) {
+      localStorage.setItem("rememberedUsername", credentials.username);
+    } else {
+      localStorage.removeItem("rememberedUsername");
+    }
+
+    setLoading(false);
+  };
 
   return (
     <div className="login-page">
@@ -73,7 +53,7 @@ const Login: React.FC = () => {
           <p className="login-subtitle">Sign in to your Interlinked account</p>
           
           {error && <div className="error-message">{error}</div>}
-          
+
           <form onSubmit={handleLogin}>
             <div className="input-group">
               <input
@@ -94,7 +74,7 @@ const Login: React.FC = () => {
                 required
               />
             </div>
-            
+
             <div className="remember-forgot">
               <label className="remember-me">
                 <input
@@ -105,17 +85,13 @@ const Login: React.FC = () => {
                 <span>Remember me</span>
               </label>
               <Link to="/forgot-password" className="forgot-password-link">
-  Forgot Password?
-</Link>
+                  Forgot Password?
+              </Link>
               
             </div>
-            
-            <button 
-              type="submit" 
-              className={`login-button ${loading ? 'loading' : ''}`}
-              disabled={loading}
-            >
-              {loading ? 'Signing in...' : 'Sign in'}
+
+            <button type="submit" className={`login-button ${loading ? 'loading' : ''}`} disabled={loading}>
+              {loading ? "Signing in..." : "Sign in"}
             </button>
           </form>
           
@@ -136,9 +112,9 @@ const Login: React.FC = () => {
               Sign in with Google
             </button>
           </div>
-          
+
           <p className="footer-text">
-            Don't have an account? <a href="#">Create account</a>
+            Don't have an account? <a href="/signup">Create account</a>
           </p>
         </div>
       </div>
