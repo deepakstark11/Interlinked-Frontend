@@ -52,6 +52,9 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = () => {
   const [disasterData, setDisasterData] = useState<DisasterDetailsProps['disaster'] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Move this useState to the top with other state declarations
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   //fetch disaster data by the ID...mainly the location 
   useEffect(() => {
     const fetchData = async () => {
@@ -292,6 +295,11 @@ const DisasterDetails: React.FC<DisasterDetailsProps> = () => {
       </div>
     );
   }
+
+  // Make sure toggleDropdown function is also declared with other functions
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
 
   return (
     <div className="disaster-details-container"
