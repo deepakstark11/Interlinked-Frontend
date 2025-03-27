@@ -1,5 +1,5 @@
 /* Modern Login Page Styling */
-.login-page {
+.login-page, .signup-page {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -48,7 +48,7 @@
 }
 
 /* Login Box Styling */
-.login-box {
+.login-box, .signup-box {
   background: rgba(255, 255, 255, 0.95);
   padding: 40px;
   border-radius: 16px;
@@ -183,7 +183,7 @@
 }
 
 /* Login Button */
-.login-button {
+.login-button, .signup-button {
   width: 100%;
   padding: 15px;
   font-size: 1.1rem;

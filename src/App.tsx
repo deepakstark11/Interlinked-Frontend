@@ -12,6 +12,7 @@ import Home from "./components/Home";
 import IncidentList from './components/IncidentList';
 import ReportIncident from './components/ReportIncident';
 import Login from "./components/Login";
+import Signup from "./components/Signup";
 import PrivateRoute from "./components/PrivateRoute";
 import Sidebar from "./components/Sidebar";
 import Unauthorized from "./components/Unauthorized";
@@ -25,7 +26,7 @@ const AppContent: React.FC = () => {
       <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY}>
         <div className="app-container">
           {/* Hide Sidebar on login page */}
-          {location.pathname !== "/login" &&location.pathname !== "/forgot-password" &&location.pathname !== "/" && <Sidebar />}
+          {location.pathname !== "/login" &&location.pathname !== "/signup" &&location.pathname !== "/forgot-password" &&location.pathname !== "/" && <Sidebar />}
           
           
 
@@ -33,6 +34,7 @@ const AppContent: React.FC = () => {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/dashboard" element={<PrivateRoute element={<FireAgencyDashboard />} allowedRoles={["fire-agency"]} />} />
               <Route path="/map" element={<PrivateRoute element={<FireMap />} allowedRoles={["fire-agency", "admin"]} />} />
