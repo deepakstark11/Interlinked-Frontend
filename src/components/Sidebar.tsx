@@ -79,7 +79,7 @@ const Sidebar: React.FC = () => {
                 <SidebarItem icon={faUserShield} text="Risk of Ignition" isCollapsed={isCollapsed} />
 
                 <SidebarItem icon={faBell} text="Announcements" isCollapsed={isCollapsed} />
-                <SidebarItem icon={faEnvelope} text="Messages" isCollapsed={isCollapsed} />
+                <SidebarItem icon={faEnvelope} text="Messages" isCollapsed={isCollapsed} link="/messages" />
 
                 <SidebarItem icon={faExclamationTriangle} text="Report a Bug" isCollapsed={isCollapsed} />
 
