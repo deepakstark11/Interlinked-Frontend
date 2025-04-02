@@ -21,6 +21,132 @@ const s3 = new S3Client({
     },
   });
 
+/**
+ * Determine the EWM number based on event category
+ * @param {string} category - Event category or type
+ * @param {string} title - Event title, used as fallback
+ * @param {string} description - Event description, used as fallback
+ * @returns {number} - EWM number (0-22)
+ */
+function determineEwmNumber(category: string = "", title: string = "", description: string = ""): number {
+  // Normalize input strings for consistent matching
+  const normalizedCategory = category.toLowerCase();
+  const normalizedTitle = title.toLowerCase();
+  const normalizedDescription = description.toLowerCase();
+  
+  // Check all text fields for category matches
+  const textToCheck = `${normalizedCategory} ${normalizedTitle} ${normalizedDescription}`;
+  
+  if (textToCheck.includes("fire") || textToCheck.includes("wildfire") || textToCheck.includes("burn") || textToCheck.includes("flame")) {
+    return 0; // Wildfires
+  } else if (textToCheck.includes("hurricane") || textToCheck.includes("cyclone") || textToCheck.includes("typhoon")) {
+    return 1; // Hurricanes
+  } else if (textToCheck.includes("earthquake") || textToCheck.includes("quake") || textToCheck.includes("seismic")) {
+    return 2; // Earthquakes
+  } else if (textToCheck.includes("tornado") || textToCheck.includes("twister")) {
+    return 3; // Tornadoes
+  } else if (textToCheck.includes("tsunami") || textToCheck.includes("tidal wave")) {
+    return 4; // Tsunamis
+  } else if (textToCheck.includes("lightning") || textToCheck.includes("thunderstorm") || textToCheck.includes("thunder")) {
+    return 5; // Extreme Lightning/Thunderstorms
+  } else if (textToCheck.includes("avalanche") || textToCheck.includes("snow slide")) {
+    return 6; // Avalanches
+  } else if (textToCheck.includes("landslide") || textToCheck.includes("mudslide")) {
+    return 7; // Landslides
+  } else if (textToCheck.includes("drought") || textToCheck.includes("dry")) {
+    return 8; // Droughts
+  } else if (textToCheck.includes("volcanic") || textToCheck.includes("volcano") || textToCheck.includes("eruption")) {
+    return 9; // Volcanic Eruptions
+  } else if (textToCheck.includes("oil spill") || textToCheck.includes("petroleum")) {
+    return 10; // Oil Spills
+  } else if (textToCheck.includes("flood") && !textToCheck.includes("flash flood")) {
+    return 11; // Flood (Long Term)
+  } else if (textToCheck.includes("flash flood")) {
+    return 12; // Flash Floods (Short Term)
+  } else if (textToCheck.includes("glacier") || textToCheck.includes("ice melt")) {
+    return 13; // Glacier Melting
+  } else if (textToCheck.includes("ice jam") || textToCheck.includes("frozen")) {
+    return 14; // Ice Jams/Frozen Regions
+  } else if (textToCheck.includes("pollution") || textToCheck.includes("air quality")) {
+    return 15; // Air Quality & Pollution
+  } else if (textToCheck.includes("chemical") || textToCheck.includes("radiation") || textToCheck.includes("leak")) {
+    return 16; // Chemical Spills/Radiation Leaks
+  } else if (textToCheck.includes("geomagnetic") || textToCheck.includes("solar flare")) {
+    return 17; // Geomagnetic Storms/Solar Flares
+  } else if (textToCheck.includes("heat") || textToCheck.includes("hot")) {
+    return 18; // Extreme Heat Events
+  } else if (textToCheck.includes("cold") || textToCheck.includes("freeze")) {
+    return 19; // Extreme Cold Events
+  } else if (textToCheck.includes("severe weather") || textToCheck.includes("storm")) {
+    return 20; // Severe Weather Events
+  } else if (textToCheck.includes("marine") || textToCheck.includes("ocean") || textToCheck.includes("sea")) {
+    return 21; // Marine Events
+  } else if (textToCheck.includes("long term") || textToCheck.includes("ongoing")) {
+    return 22; // Long Term Events
+  }
+  
+  // Default to earthquake (2) if no match found
+  return 2;
+}
+
+/**
+ * Get an appropriate image for an event based on its EWM number
+ * @param {number} ewmNumber - The event type EWM number
+ * @returns {string} - Path to the appropriate image
+ */
+function getEventImage(ewmNumber: number): string {
+  switch (ewmNumber) {
+    case 0: // Wildfires
+      return "/WildfireImage.jpg";
+    case 1: // Hurricanes
+      return "/HurricaneImage.jpg";
+    case 2: // Earthquakes
+      return "/ChatsworthEarthquake.jpeg";
+    case 3: // Tornadoes
+      return "/TornadoImage.jpg";
+    case 4: // Tsunamis
+      return "/TsunamiImage.jpg";
+    case 5: // Extreme Lightning/Thunderstorms
+      return "/LightningImage.jpg";
+    case 6: // Avalanches
+      return "/AvalancheImage.jpg";
+    case 7: // Landslides
+      return "/LandslideImage.jpg";
+    case 8: // Droughts
+      return "/DroughtImage.jpg";
+    case 9: // Volcanic Eruptions
+      return "/VolcanoImage.jpg";
+    case 10: // Oil Spills
+      return "/OilSpillImage.jpg";
+    case 11: // Flood (Long Term)
+      return "/FloodImage.jpg";
+    case 12: // Flash Floods (Short Term)
+      return "/FlashFloodImage.jpg";
+    case 13: // Glacier Melting
+      return "/GlacierImage.jpg";
+    case 14: // Ice Jams/Frozen Regions
+      return "/IceJamImage.jpg";
+    case 15: // Air Quality & Pollution
+      return "/PollutionImage.jpg";
+    case 16: // Chemical Spills/Radiation Leaks
+      return "/ChemicalSpillImage.jpg";
+    case 17: // Geomagnetic Storms/Solar Flares
+      return "/SolarFlareImage.jpg";
+    case 18: // Extreme Heat Events
+      return "/HeatWaveImage.jpg";
+    case 19: // Extreme Cold Events
+      return "/ColdSnapImage.jpg";
+    case 20: // Severe Weather Events
+      return "/SevereWeatherImage.jpg";
+    case 21: // Marine Events
+      return "/MarineEventImage.jpg";
+    case 22: // Long Term Events
+      return "/LongTermEventImage.jpg";
+    default:
+      return "/DefaultDisasterImage.jpg";
+  }
+}
+
   /**
  * Fetch earthquake events from S3 and filter based on date and location.
  * @param {number} daysAgo - Number of days to filter (e.g., 24 hours, 3 days, 7 days)
@@ -65,6 +191,15 @@ const s3 = new S3Client({
           cutoffDate.setDate(cutoffDate.getDate() - daysAgo);
           // if (eventDate < cutoffDate) return null;
 
+          // Determine appropriate ewm_number based on event type
+          const eventCategory = event.metadata.type || "";
+          const eventTitle = event.metadata.title || "";
+          const eventDescription = event.description || "";
+          const ewmNumber = determineEwmNumber(eventCategory, eventTitle, eventDescription);
+
+          // Get the appropriate image based on event type
+          const eventImage = getEventImage(ewmNumber);
+
           return {
             unique_id: event.id || "Unknown ID",
             name: event.metadata.title || "Unnamed Event",
@@ -80,9 +215,9 @@ const s3 = new S3Client({
             event_metadata: event.metadata || {},
             weather_metadata: event.weather || {},
             insights: event.insights || {},
-            ewm_number: 2, // Earthquakes are category 2 in EWM
+            ewm_number: ewmNumber,
             status: event.metadata.status || "UNKNOWN",
-            image: "/ChatsworthEarthquake.jpeg",
+            image: eventImage,
         };
       } catch (error) {
         console.error(`Error fetching ${file.Key}:`, error);
