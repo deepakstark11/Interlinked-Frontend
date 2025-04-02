@@ -1,5 +1,19 @@
 import React from 'react';
 import '../styles/DisasterCard.css';
+import { useNavigate } from 'react-router-dom';
+
+/* Modified here because of the database format
+ * can change back in the future
+ */
+// interface DisasterCardProps {
+//   id: number;
+//   name: string;
+//   status: string;
+//   resolvedDate?: string;
+//   location: string;
+//   acres: number;
+//   image: string;
+// }
 
 interface DisasterCardProps {
   unique_id: string;
@@ -22,19 +36,27 @@ interface DisasterCardProps {
   image: string;
 }
 
+/* To make sure the disaster now can fit the files in database, I changed the format of the diaster card
+ * Can be changed in the future to add more details (such as description and image)
+ */
 const DisasterCard: React.FC<DisasterCardProps> = ({ 
   unique_id, 
   name, 
   status, 
-  resolvedDate, 
   description,
   location, 
   image,
   category,
   ewm_number,
   start_date,
-  coordinates 
+  coordinates,
+  source,
+  event_metadata,
+  weather_metadata,
+  insights,
+  resolvedDate
 }) => {
+  const navigate = useNavigate();
 
   //start_date formatting:
   const formatDate = (dateString: string) => {
@@ -47,6 +69,7 @@ const DisasterCard: React.FC<DisasterCardProps> = ({
       minute: '2-digit'
     })
   }
+
   return (
     <div className="disaster-card">
       <div className="disaster-info">
@@ -84,11 +107,15 @@ const DisasterCard: React.FC<DisasterCardProps> = ({
             </div>
           )}
         </div>
-        <button className='view-details'>VIEW DETAILS</button>
+        <button 
+          className='view-details' 
+          onClick={() => navigate(`/disaster/${unique_id}`)}
+        >
+          VIEW DETAILS
+        </button>
       </div>
       <img src={image} alt={`${name}`} className="disaster-image" />
     </div>
   );
 };
-
 export default DisasterCard;

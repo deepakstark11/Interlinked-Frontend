@@ -1,0 +1,101 @@
+.home-container {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  margin-top: 0;
+}
+
+.centered-heading {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #ffffff;
+  margin-top: 40px;
+}
+
+.report-form {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12), 0 1px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  height: 70%;
+  max-width: 768px;
+  max-height: 756px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.report-form-content {
+  text-align: center;
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  color: #000;
+}
+
+.form-input, .form-mcq {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  background-color: white;
+  color: #000;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
+}
+
+.label {
+  text-align: left;
+  align-items: flex-start;
+  align-self: flex-start;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  width: 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .report-form {
+    width: 80%;
+    height: auto;
+  }
+
+  .centered-heading {
+    font-size: 1.5rem;
+    margin-top: 20px;
+  }
+
+  .form-input, .form-mcq {
+    font-size: 14px;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .report-form {
+    width: 90%;
+    height: auto;
+  }
+
+  .centered-heading {
+    font-size: 1.2rem;
+    margin-top: 15px;
+  }
+
+  .form-input, .form-mcq {
+    font-size: 12px;
+    padding: 8px;
+  }
+}

@@ -34,12 +34,10 @@ const Home: React.FC = () => {
 
   return (
 
-<div className="home-container">
-    <h1 className="centered-heading">Location: {location}</h1>
-    <IncidentList />
+  <div className="home-container">
+      <h1 className="centered-heading">Location: {location}</h1>
+      <IncidentList />
   </div>
- 
-
     
   );
 };

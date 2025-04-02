@@ -1,15 +1,14 @@
 import React, { createContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-// Simulated user database with roles
-const MOCK_USERS = [
-  { username: "admin", password: "password123", role: "admin" },
-  { username: "fireagency", password: "firepass", role: "fire-agency" }
-];
+interface User {
+  username: string;
+  role: string;
+}
 
 interface AuthContextType {
-  user: any;
-  login: (username: string, password: string) => boolean;
+  user: User | null;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
   role: string | null;
@@ -18,7 +17,7 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<{ username: string; role: string } | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,27 +27,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const login = (username: string, password: string) => {
-    const foundUser = MOCK_USERS.find(user => user.username === username && user.password === password);
-    if (foundUser) {
-      const userData = { username: foundUser.username, role: foundUser.role };
+  const login = async (username: string, password: string) => {
+    try {
+      const res = await fetch(" https://interlinked-corp-frontend.vercel.app/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+      console.log("Login response:", data); // Debugging line
+      
+      if (!res.ok) throw new Error(data.message);
+
+      const userData = { username: data.username, role: data.role };
       localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("token", data.token);
       setUser(userData);
-      
-      // Redirect based on user role
-      if (userData.role === "admin") {
-        navigate("/admin-dashboard");
-      } else {
-        navigate("/dashboard");
-      }
-      
+
+      navigate(userData.role === "admin" ? "/admin-dashboard" : "/dashboard");
       return true;
+    } catch (err) {
+      console.error("Login error:", err);
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
     setUser(null);
     navigate("/login");
   };

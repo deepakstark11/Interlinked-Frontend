@@ -1,7 +1,8 @@
-import React, { useState, useContext, useEffect } from "react";
-import { AuthContext } from "./AuthContext";
-// import { useNavigate } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+//import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "../styles/Login.css"; // Import the new CSS file
+import { AuthContext } from "./AuthContext";
 
 const Login: React.FC = () => {
   const [credentials, setCredentials] = useState({ username: "", password: "" });
@@ -9,39 +10,13 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const auth = useContext(AuthContext);
-  // const navigate = useNavigate();
+  //const navigate = useNavigate();
 
-  // Clear error when credentials change
+  // Clear error when credentials change  
   useEffect(() => {
     if (error) setError(null);
   }, [credentials]);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    try {
-      // Simulate network delay for better UX feedback
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      if (auth?.login(credentials.username, credentials.password)) {
-        setError(null);
-        // If remember me is checked, you could store this in localStorage
-        if (rememberMe) {
-          localStorage.setItem("rememberedUsername", credentials.username);
-        } else {
-          localStorage.removeItem("rememberedUsername");
-        }
-      } else {
-        setError("Invalid username or password. Please try again.");
-      }
-    } catch (err) {
-      setError("An error occurred during login. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  
   // Load remembered username if available
   useEffect(() => {
     const savedUsername = localStorage.getItem("rememberedUsername");
@@ -51,18 +26,34 @@ const Login: React.FC = () => {
     }
   }, []);
 
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const success = await auth?.login(credentials.username, credentials.password);
+    if (!success) {
+      setError("Invalid username or password.");
+    } else if (rememberMe) {
+      localStorage.setItem("rememberedUsername", credentials.username);
+    } else {
+      localStorage.removeItem("rememberedUsername");
+    }
+
+    setLoading(false);
+  };
+
   return (
     <div className="login-page">
       <div className="login-container">
         <div className="login-box">
-          <div className="logo-container">
+          <div className="logo-container-login">
             <img src="/interlinked_logo_white.png" alt="Interlinked Logo" className="company-logo" />
           </div>
           <h1>Welcome</h1>
           <p className="login-subtitle">Sign in to your Interlinked account</p>
           
           {error && <div className="error-message">{error}</div>}
-          
+
           <form onSubmit={handleLogin}>
             <div className="input-group">
               <input
@@ -83,7 +74,7 @@ const Login: React.FC = () => {
                 required
               />
             </div>
-            
+
             <div className="remember-forgot">
               <label className="remember-me">
                 <input
@@ -93,15 +84,14 @@ const Login: React.FC = () => {
                 />
                 <span>Remember me</span>
               </label>
-              <a href="#" className="forgot-link">Forgot password?</a>
+              <Link to="/forgot-password" className="forgot-password-link">
+                  Forgot Password?
+              </Link>
+              
             </div>
-            
-            <button 
-              type="submit" 
-              className={`login-button ${loading ? 'loading' : ''}`}
-              disabled={loading}
-            >
-              {loading ? 'Signing in...' : 'Sign in'}
+
+            <button type="submit" className={`login-button ${loading ? 'loading' : ''}`} disabled={loading}>
+              {loading ? "Signing in..." : "Sign in"}
             </button>
           </form>
           
@@ -122,9 +112,9 @@ const Login: React.FC = () => {
               Sign in with Google
             </button>
           </div>
-          
+
           <p className="footer-text">
-            Don't have an account? <a href="#">Create account</a>
+            Don't have an account? <a href="/signup">Create account</a>
           </p>
         </div>
       </div>
